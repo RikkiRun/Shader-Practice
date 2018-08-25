@@ -7,10 +7,15 @@
 
 class MyGlWindow : public QGLWidget
 {
-protected:
-	void initializeGL();
-	void paintGL();
 public:
+	//MyGlWindow() { initializeGL(); };
+
+protected:
+	void initializeGL() override;
+	void paintGL() override;
+public:
+
+
 };
 
 #endif
