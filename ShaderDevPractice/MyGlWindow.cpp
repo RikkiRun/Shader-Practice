@@ -1,23 +1,24 @@
 #include <gl\glew.h>
 #include <MyGlWindow.h>
 
-void MyGlWindow::initializeGL() {
-	glewInit();
+extern const char* vertexShaderCode;
+extern const char* fragmentShaderCode;
 
+void sendDataToOpenGL() {
 	GLfloat verts[] = {
-		+0.0f, +0.0f,  
-		+0.0f, +0.0f, +0.0f,
-		+1.0f, +1.0f, 
-		+0.0f, +0.0f, +0.0f,
-		-1.0f, +1.0f, 
-		+0.0f, +0.0f, +0.0f,
-		-1.0f, -1.0f,
-		+0.0f, +0.0f, +0.0f,
-		+1.0f, -1.0f,
-		+0.0f, +0.0f, +0.0f,
+	+0.0f, +0.0f,   //position
+	+1.0f, +0.0f, +0.0f, // color
+	+1.0f, +1.0f,
+	+1.0f, +0.0f, +0.0f,
+	-1.0f, +1.0f,
+	+1.0f, +0.0f, +0.0f,
+	-1.0f, -1.0f,
+	+1.0f, +0.0f, +0.0f,
+	+1.0f, -1.0f,
+	+1.0f, +0.0f, +0.0f,
 	};
 	GLuint vertexBufferID; // vertex bufferID
-	 
+
 	glGenBuffers(1, &vertexBufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
@@ -34,6 +35,34 @@ void MyGlWindow::initializeGL() {
 	glGenBuffers(1, &indexBufferID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+}
+
+void installShaders() {
+	GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+	GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+
+	const char* adapter[1];
+	adapter[0] = vertexShaderCode;
+	glShaderSource(vertexShaderID, 1, adapter, 0);
+	adapter[0] = fragmentShaderCode;
+	glShaderSource(fragmentShaderID, 1, adapter, 0);
+	
+	glCompileShader(vertexShaderID);
+	glCompileShader(fragmentShaderID);
+
+	GLuint programID = glCreateProgram();
+	glAttachShader(programID, vertexShaderID);
+	glAttachShader(programID, fragmentShaderID);
+	glLinkProgram(programID);
+
+	glUseProgram(programID);
+}
+
+void MyGlWindow::initializeGL() {
+	glewInit();
+	sendDataToOpenGL();
+	installShaders();
 
 }
 
