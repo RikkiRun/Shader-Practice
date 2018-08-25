@@ -16,7 +16,7 @@ void MyGlWindow::initializeGL() {
 	glEnableVertexAttribArray(0);
 	glVertexAttribLPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 }
-
+//hey i am rikki
 void MyGlWindow::paintGL() {
 	
 }
