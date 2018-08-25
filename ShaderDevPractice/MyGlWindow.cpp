@@ -17,7 +17,7 @@ void MyGlWindow::initializeGL() {
 		+0.0f, +0.0f, +0.0f,
 	};
 	GLuint vertexBufferID; // vertex bufferID
-
+	 
 	glGenBuffers(1, &vertexBufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
