@@ -1,5 +1,6 @@
 #include <gl\glew.h>
 #include <iostream>
+#include <fstream>
 #include <MyGlWindow.h>
 using namespace std;
 
@@ -33,7 +34,6 @@ void sendDataToOpenGL() {
 	glGenBuffers(1, &indexBufferID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
 }
 
 bool checkStatus(GLint objectID, 
@@ -103,14 +103,29 @@ bool checkProgramStatus(GLuint programID) {
 
 }
 
+string  readShaderCode(const char* fileName) {
+	ifstream meInput(fileName);
+	if (!meInput.good()) {
+		cout << "File failed to load ..." << fileName;
+		exit(1);
+	}
+	 
+	return std::string(
+		std::istreambuf_iterator<char>(meInput),
+		std::istreambuf_iterator<char>()
+	);
+}
+
 void installShaders() {
 	GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 
-	const char* adapter[1];
-	adapter[0] = vertexShaderCode;
+	const GLchar* adapter[1];
+	string temp = readShaderCode("VertexShaderCode.glsl");
+	adapter[0] = temp.c_str();
 	glShaderSource(vertexShaderID, 1, adapter, 0);
-	adapter[0] = fragmentShaderCode;
+	temp = readShaderCode("FragmentShaderCode.glsl");
+	adapter[0] = temp.c_str();
 	glShaderSource(fragmentShaderID, 1, adapter, 0);
 	
 	glCompileShader(vertexShaderID);

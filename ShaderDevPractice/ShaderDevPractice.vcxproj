@@ -26,6 +26,10 @@
   <ItemGroup>
     <ClInclude Include="MyGlWindow.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="FragmentShaderCode.glsl" />
+    <None Include="VertexShaderCode.glsl" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{9852F956-3322-4F6A-BE09-97DC7D0770D8}</ProjectGuid>
