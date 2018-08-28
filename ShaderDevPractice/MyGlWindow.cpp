@@ -8,13 +8,22 @@ extern const char* vertexShaderCode;
 extern const char* fragmentShaderCode;
 
 void sendDataToOpenGL() {
+	const float RED_TRIANGLE_Z = -0.5f;
+	const float BLUE_TRIANGLE_Z = 0.5f;
 	GLfloat verts[] = {
-	+0.0f, +1.0f,   //position
+	+0.0f, +1.0f, RED_TRIANGLE_Z,  //position
 	+1.0f, +0.0f, +0.0f, // color
-	-1.0f, -1.0f,
-	+0.0f, +0.0f, +1.0f,
-	+1.0f, -1.0f,
-	+0.0f, +1.0f, +0.0f,
+	-1.0f, -1.0f, RED_TRIANGLE_Z,
+	+1.0f, +0.0f, +0.0f,
+	+1.0f, -1.0f, RED_TRIANGLE_Z,
+	+1.0f, +0.0f, +0.0f,
+
+	+0.0f, -1.0f, BLUE_TRIANGLE_Z,  //position
+	+1.0f, +0.0f, +1.0f, // color
+	+1.0f, +1.0f, BLUE_TRIANGLE_Z,
+	+1.0f, +0.0f, +1.0f,
+	-1.0f, +1.0f, BLUE_TRIANGLE_Z,
+	+1.0f, +0.0f, +1.0f,
 	};
 	GLuint vertexBufferID; // vertex bufferID
 
@@ -23,13 +32,13 @@ void sendDataToOpenGL() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0); //position
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0); //GL_FALSE: Not normalize data; stride: where the data begins, the first position to the second position
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0); //GL_FALSE: Not normalize data; stride: where the data begins, the first position to the second position
 
 	// describe color attribute
 	glEnableVertexAttribArray(1); //color
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (char*)(sizeof(float) * 2)); // last one: 2 float until we get to the beginning of the color data
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (char*)(sizeof(float) * 3)); // last one: 2 float until we get to the beginning of the color data
 
-	GLushort indices[] = { 0, 1, 2}; // save memory
+	GLushort indices[] = { 0, 1, 2 ,3, 4, 5 }; // glushort for saving memory
 	GLuint indexBufferID; // element bufferID
 	glGenBuffers(1, &indexBufferID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
@@ -149,15 +158,16 @@ void installShaders() {
 
 void MyGlWindow::initializeGL() {
 	glewInit();
+	glEnable(GL_DEPTH_TEST);
 	sendDataToOpenGL();
 	installShaders();
-
 }
 
 
 void MyGlWindow::paintGL() {
+	glClear(GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, width(), height());
 	//glDrawArrays(GL_TRIANGLES, 0, 6);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
 
 }
