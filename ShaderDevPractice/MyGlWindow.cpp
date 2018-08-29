@@ -164,6 +164,7 @@ void MyGlWindow::initializeGL() {
 }
 
 
+
 void MyGlWindow::paintGL() {
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, width(), height());
