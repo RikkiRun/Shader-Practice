@@ -16,9 +16,14 @@ const uint MAX_TRIS = 20;
 uint numTris = 0;
 
 void sendDataToOpenGL() {
-	/* //draw two triangles
+	
+	//draw two triangles
 	const float RED_TRIANGLE_Z = -0.5f;
 	const float BLUE_TRIANGLE_Z = 0.5f;
+	const float TRIANGLE_Z = 0.5f;
+
+
+	/*
 	GLfloat verts[] = {
 	+0.0f, +1.0f, RED_TRIANGLE_Z,  //position
 	+1.0f, +0.0f, +0.0f, // color
@@ -35,6 +40,24 @@ void sendDataToOpenGL() {
 	+1.0f, +0.0f, +1.0f,
 	};
 	*/
+	
+
+	/*
+	GLfloat verts[] = {
+		+0.0f, +0.0f, TRIANGLE_Z
+		+1.0f, +0.0f, +0.0f,
+
+		+0.0f, -0.4f, TRIANGLE_Z
+		+1.0f, +0.0f, +0.0f,
+
+		+0.3f, +0.0f, TRIANGLE_Z
+		+1.0f, +0.0f, +0.0f,
+
+		+0.3f, -0.3f, TRIANGLE_Z
+		+1.0f, +0.0f, +0.0f
+	};
+	*/
+	
 
 	GLuint vertexBufferID; // vertex bufferID
 
@@ -43,21 +66,22 @@ void sendDataToOpenGL() {
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
 	glBufferData(GL_ARRAY_BUFFER, MAX_TRIS * TRIANGLE_BYTE_SIZE, NULL, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0); //position
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0); //GL_FALSE: Not normalize data; stride: where the data begins, the first position to the second position
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0); //GL_FALSE: Not normalize data; stride: where the data begins, the first position to the second position
 
 	// describe color attribute
 	glEnableVertexAttribArray(1); //color
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (char*)(sizeof(float) * 3)); // last one: 2 float until we get to the beginning of the color data
 
 
-	/* //indices
-	GLushort indices[] = { 0, 1, 2 ,3, 4, 5 }; // glushort for saving memory
+	//indices
+	GLushort indices[] = { 0, 1, 2 , 1, 2, 3 }; // glushort for saving memory
 	GLuint indexBufferID; // element bufferID
 	glGenBuffers(1, &indexBufferID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-	*/
+	
 }
+
 
 void sendAnotherTriToOpenGL() {
 	if (numTris == MAX_TRIS)
@@ -77,6 +101,7 @@ void sendAnotherTriToOpenGL() {
 		TRIANGLE_BYTE_SIZE * numTris, TRIANGLE_BYTE_SIZE, thisTri);
 	numTris++;
 }
+
 
 bool checkStatus(GLint objectID, 
 	PFNGLGETSHADERIVPROC objectPropertyGetterFunc, 
@@ -206,10 +231,11 @@ void MyGlWindow::paintGL() {
 	glViewport(0, 0, width(), height());
 	//glDrawArrays(GL_TRIANGLES, 0, 6);
 	//draw a triangle
-	//glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
+	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+	
 	
 	//draw a new triangle every new frame
 	sendAnotherTriToOpenGL();
 	glDrawArrays(GL_TRIANGLES, (numTris - 1) * NUM_VERTICES_PER_TRI, 
 		numTris * NUM_VERTICES_PER_TRI);
-}
+	}
