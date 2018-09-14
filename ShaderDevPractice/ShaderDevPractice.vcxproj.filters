@@ -11,5 +11,6 @@
   <ItemGroup>
     <None Include="VertexShaderCode.glsl" />
     <None Include="FragmentShaderCode.glsl" />
+    <None Include="UniformShaderCode.glsl" />
   </ItemGroup>
 </Project>
