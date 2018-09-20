@@ -7,6 +7,9 @@ using namespace std;
 extern const char* vertexShaderCode;
 extern const char* fragmentShaderCode;
 
+GLfloat xPosition = 0.0f;
+GLuint programID;
+
 void sendDataToOpenGL() {
 
 
@@ -145,7 +148,10 @@ string  readShaderCode(const char* fileName) {
 	);
 }
 
+
 void installShaders() {
+	programID = glCreateProgram();
+
 	GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 
@@ -164,7 +170,6 @@ void installShaders() {
 		return;
 	}
 
-	GLuint programID = glCreateProgram();
 	glAttachShader(programID, vertexShaderID);
 	glAttachShader(programID, fragmentShaderID);
 	glLinkProgram(programID);
@@ -184,13 +189,28 @@ void MyGlWindow::initializeGL() {
 }
 
 
+ 
 
 void MyGlWindow::paintGL() {
+
 	//but clearing buffer is expensive, so need to be cleared once
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	glViewport(0, 0, width(), height());
+
+
+	GLint xMoveUniformLocation = glGetUniformLocation(programID, "xMove");
+	GLint yMoveUniformLocation = glGetUniformLocation(programID, "yMove");
+
+	xPosition += 0.1;
 	//glClear(GL_DEPTH_BUFFER_BIT);
 	//glClear(GL_COLOR_BUFFER_BIT); //there's a back buffer and a front buffer, if not clear, it will switch
-	glViewport(0, 0, width(), height());
+
+	glUniform1f(xMoveUniformLocation, xPosition);
+	glUniform1f(yMoveUniformLocation, -0.9f);
+//	glUniform1f(xMoveUniformLocation, 0.0f);
+
+
+
 	//glDrawArrays(GL_TRIANGLES, 0, 3);
 	//draw a triangle
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);

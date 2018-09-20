@@ -4,9 +4,11 @@
     <ClCompile Include="Mainer.cpp" />
     <ClCompile Include="MyGlWindow.cpp" />
     <ClCompile Include="MyShaderCode.cpp" />
+    <ClCompile Include="MyWidget.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyGlWindow.h" />
+    <ClInclude Include="MyWidget.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="VertexShaderCode.glsl" />
