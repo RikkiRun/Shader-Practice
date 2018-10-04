@@ -4,61 +4,49 @@
 #include <MyGlWindow.h>
 #include <glm\glm.hpp>
 #include <Vertex.h> 
+#include <glm\gtc\matrix_transform.hpp>
 #include <ShapeGenerator.h>
 using namespace std;
+using glm::vec3;
+using glm::mat4;
+
+const uint NUM_VERTICES_PER_TRI = 3;
+const uint NUM_FLOATS_PER_VERTICE = 6;
+const uint VERTEX_BYTE_SIZE = NUM_FLOATS_PER_VERTICE * sizeof(float);
 
 extern const char* vertexShaderCode;
 extern const char* fragmentShaderCode;
 
-GLfloat xPosition = 0.0f;
-GLfloat yPosition = 0.0f;
 GLuint programID;
+GLuint numIndices;
 
 void sendDataToOpenGL() 
 {
-	ShapeDate tri = ShapeGenerator::makeTriangle();
+	ShapeDate shape = ShapeGenerator::makeCube();
+
 	GLuint vertexBufferID; // vertex bufferID
 
 	glGenBuffers(1, &vertexBufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
-	glBufferData(GL_ARRAY_BUFFER, tri.vertexBufferSize(), tri.vertices, GL_STATIC_DRAW);
-	//glBufferData(GL_ARRAY_BUFFER, MAX_TRIS * TRIANGLE_BYTE_SIZE, NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, shape.vertexBufferSize(), shape.vertices, GL_STATIC_DRAW);
+
 	glEnableVertexAttribArray(0); //position
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0); //GL_FALSE: Not normalize data; stride: where the data begins, the first position to the second position
-
-	// describe color attribute1
-	glEnableVertexAttribArray(1); //color
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (char*)(sizeof(float) * 3)); // last one: 2 float until we get to the beginning of the color data
-
-
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, 0); //GL_FALSE: Not normalize data; stride: where the data begins, the first position to the second position
 
 	
+	// describe color attribute1
+	glEnableVertexAttribArray(1); //color
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, (char*)(sizeof(float) * 3)); // last one: 2 float until we get to the beginning of the color data
+
 	GLuint indexBufferID; // element bufferID
 	glGenBuffers(1, &indexBufferID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, tri.indexBufferSize(), tri.indices, GL_STATIC_DRAW);
-	tri.cleanup();
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, shape.indexBufferSize(), shape.indices, GL_STATIC_DRAW);
+	
+	numIndices = shape.numIndices;
+
+	shape.cleanup();
 }
-
-/*
-void sendAnotherTriToOpenGL() {
-
-	GLfloat thisTri[] = {
-		1.0f, 1.0f, 0.0f,
-		0.6f, 0.0f, 0.8f,
-
-		 0.0f, 1.0f, 0.0f,
-		0.8f, 0.0f, 0.2f,
-
-		 -1.0f, 0.0f, 0.0f,
-		0.5f, 0.0f, 0.7f,
-	};
-
-	glBufferSubData(GL_ARRAY_BUFFER,
-		TRIANGLE_BYTE_SIZE * numTris, TRIANGLE_BYTE_SIZE, thisTri);
-	numTris++;
-}
-*/
 
 
 bool checkStatus(GLint objectID,
@@ -199,41 +187,15 @@ void MyGlWindow::paintGL()
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, width(), height());
 
+	mat4 translationMatrix = glm::translate(mat4(), vec3(0.0f, 0.0f, -3.0f));
+	mat4 rotationMatrix = glm::rotate(mat4(), 45.0f, vec3(1.0f, 0.0f, 0.0f));
+	mat4 projectionMartrix = glm::perspective(60.0f, ((float)width()) / height(), 0.1f, 10.0f);
 
-	GLint xMoveUniformLocation = glGetUniformLocation(programID, "xMove");
-	GLint yMoveUniformLocation = glGetUniformLocation(programID, "yMove");
+	mat4 fullTransformMatrix = projectionMartrix * translationMatrix * rotationMatrix;
 
-	xPosition += 0.1;
-	yPosition -= 0.1;
-	//glClear(GL_DEPTH_BUFFER_BIT);
-	//glClear(GL_COLOR_BUFFER_BIT); //there's a back buffer and a front buffer, if not clear, it will switch
+	GLint  fullTransformMatrixUniformLocation = glGetUniformLocation(programID, "fullTransformMatrix");
 
-	glUniform1f(xMoveUniformLocation, xPosition);
-	glUniform1f(yMoveUniformLocation, yPosition);
-//	glUniform1f(xMoveUniformLocation, 0.0f);
+	glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1, GL_FALSE, &fullTransformMatrix[0][0]);
 
-
-	//glDrawArrays(GL_TRIANGLES, 0, 3);
-	//draw a triangle
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
-
-	xPosition += 0.2;
-	yPosition -= 0.2;
-	//glClear(GL_DEPTH_BUFFER_BIT);
-	//glClear(GL_COLOR_BUFFER_BIT); //there's a back buffer and a front buffer, if not clear, it will switch
-
-	glUniform1f(xMoveUniformLocation, xPosition);
-	glUniform1f(yMoveUniformLocation, yPosition);
-	//	glUniform1f(xMoveUniformLocation, 0.0f);
-
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0);
 }
-/*
-//draw a new triangle every new frame
-	sendAnotherTriToOpenGL();
-	glDrawArrays(GL_TRIANGLES, (numTris - 1) * NUM_VERTICES_PER_TRI,
-		numTris * NUM_VERTICES_PER_TRI);
-	}
-	*/
-	//uniform position --> keyboard movement 
-

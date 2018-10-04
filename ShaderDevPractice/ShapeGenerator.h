@@ -4,6 +4,7 @@ class ShapeGenerator
 {
 public:
 	static ShapeDate makeTriangle();
+	static ShapeDate makeCube();
 	ShapeGenerator();
 	~ShapeGenerator();
 };
