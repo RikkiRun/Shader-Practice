@@ -23,10 +23,14 @@
     <ClCompile Include="MyGlWindow.cpp" />
     <ClCompile Include="MyShaderCode.cpp" />
     <ClCompile Include="MyWidget.cpp" />
+    <ClCompile Include="ShapeGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyGlWindow.h" />
     <ClInclude Include="MyWidget.h" />
+    <ClInclude Include="ShapeData.h" />
+    <ClInclude Include="ShapeGenerator.h" />
+    <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FragmentShaderCode.glsl" />
@@ -93,7 +97,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\Middleware\glew\include;$(ProjectDir);$(ProjectDir)..\..\Middleware\Qt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\Middleware\glew\include;$(ProjectDir);$(ProjectDir)..\..\Middleware\glm\glm;$(ProjectDir)..\..\Middleware\glm;$(ProjectDir)..\..\Middleware\Qt\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>

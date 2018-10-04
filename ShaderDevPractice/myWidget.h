@@ -1,17 +1,14 @@
-/*
+
 #ifndef MY_WIDGET
 #define MY_WIDGET
 
 
 #pragma once
-class myWidget
+class MyWidget
 {
 public:
-	myWidget();
-	~myWidget();
+	MyWidget();
+	~MyWidget();
 };
 
-
-
 #endif // !
-*/

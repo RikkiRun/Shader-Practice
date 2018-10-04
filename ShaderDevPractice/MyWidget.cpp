@@ -1,10 +1,11 @@
-#include "myWidget.h"
+#include "MyWidget.h"
 #include <MyGlWindow.h>
-
+#include <QtGui\qvboxlayout>
+ 
 /*
 
 MyWidget::MyWidget() {
-	myGLWindow = new MyGLWindow();
+	myGLWindow = new MyGlWindow();
 
 	QVBoxLayout* mainLayout;
 	setLayout(mainLayout = new QVBoxLayout);
@@ -40,4 +41,13 @@ MyWidget::~MyWidget()
 {
 }
 
+
+MyWidget::MyWidget()
+{
+}
+
+
+MyWidget::~MyWidget()
+{
+}
 */

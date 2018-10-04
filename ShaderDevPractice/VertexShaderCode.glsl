@@ -6,6 +6,8 @@ in layout(location = 1) vec3 vertexColor;
 
 uniform float xMove;
 uniform float yMove;
+uniform mat4 modelTransformMatrix;
+uniform mat4 projectionMatrix;
 
 out vec3 theColor;
 
@@ -18,5 +20,4 @@ void main()
 	theColor = vertexColor;
 	theColor.x = xMove;
 	theColor.y = yMove;
-
 }

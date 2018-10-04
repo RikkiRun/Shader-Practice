@@ -2,34 +2,26 @@
 #include <iostream>
 #include <fstream>
 #include <MyGlWindow.h>
+#include <glm\glm.hpp>
+#include <Vertex.h> 
+#include <ShapeGenerator.h>
 using namespace std;
 
 extern const char* vertexShaderCode;
 extern const char* fragmentShaderCode;
 
 GLfloat xPosition = 0.0f;
+GLfloat yPosition = 0.0f;
 GLuint programID;
 
-void sendDataToOpenGL() {
-
-
-	GLfloat theTri[] = {
-	-1.0f, 1.0f, 0.0f,
-	0.6f, 0.0f, 0.8f,
-
-	-1.0f, 0.9f, 0.0f,
-	0.8f, 0.0f, 0.2f,
-
-	-0.9f, 0.9f, 0.0f,
-	0.5f, 0.0f, 0.7f,
-	};
-
-
+void sendDataToOpenGL() 
+{
+	ShapeDate tri = ShapeGenerator::makeTriangle();
 	GLuint vertexBufferID; // vertex bufferID
 
 	glGenBuffers(1, &vertexBufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(theTri), theTri, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, tri.vertexBufferSize(), tri.vertices, GL_STATIC_DRAW);
 	//glBufferData(GL_ARRAY_BUFFER, MAX_TRIS * TRIANGLE_BYTE_SIZE, NULL, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0); //position
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0); //GL_FALSE: Not normalize data; stride: where the data begins, the first position to the second position
@@ -39,12 +31,13 @@ void sendDataToOpenGL() {
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (char*)(sizeof(float) * 3)); // last one: 2 float until we get to the beginning of the color data
 
 
-	//indices
-	GLushort indices[] = { 0, 1, 2 }; // glushort for saving memory
+
+	
 	GLuint indexBufferID; // element bufferID
 	glGenBuffers(1, &indexBufferID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, tri.indexBufferSize(), tri.indices, GL_STATIC_DRAW);
+	tri.cleanup();
 }
 
 /*
@@ -71,7 +64,8 @@ void sendAnotherTriToOpenGL() {
 bool checkStatus(GLint objectID,
 	PFNGLGETSHADERIVPROC objectPropertyGetterFunc,
 	PFNGLGETSHADERINFOLOGPROC getInfoLogFunc,
-	GLenum statusType) {
+	GLenum statusType)
+{
 
 	GLint status; // only 1 status
 	objectPropertyGetterFunc(objectID, statusType, &status);
@@ -91,7 +85,8 @@ bool checkStatus(GLint objectID,
 
 }
 
-bool checkShaderStatus(GLuint shaderID) {
+bool checkShaderStatus(GLuint shaderID)
+{
 	/*
 	//get GLSL compiler error
 	GLint compilerStatus; // only 1 status
@@ -114,7 +109,8 @@ bool checkShaderStatus(GLuint shaderID) {
 	return checkStatus(shaderID, glGetShaderiv, glGetShaderInfoLog, GL_COMPILE_STATUS);
 }
 
-bool checkProgramStatus(GLuint programID) {
+bool checkProgramStatus(GLuint programID)
+{
 	/*
 	GLint linkStatus;
 	glGetProgramiv(programID, GL_LINK_STATUS, &linkStatus);
@@ -135,7 +131,8 @@ bool checkProgramStatus(GLuint programID) {
 
 }
 
-string  readShaderCode(const char* fileName) {
+string  readShaderCode(const char* fileName)
+{
 	ifstream meInput(fileName);
 	if (!meInput.good()) {
 		cout << "File failed to load ..." << fileName;
@@ -149,7 +146,8 @@ string  readShaderCode(const char* fileName) {
 }
 
 
-void installShaders() {
+void installShaders() 
+{
 	programID = glCreateProgram();
 
 	GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -166,7 +164,8 @@ void installShaders() {
 	glCompileShader(vertexShaderID);
 	glCompileShader(fragmentShaderID);
 
-	if (!checkShaderStatus(vertexShaderID) || !checkShaderStatus(fragmentShaderID)) {
+	if (!checkShaderStatus(vertexShaderID) || !checkShaderStatus(fragmentShaderID)) 
+	{
 		return;
 	}
 
@@ -174,14 +173,16 @@ void installShaders() {
 	glAttachShader(programID, fragmentShaderID);
 	glLinkProgram(programID);
 
-	if (!checkProgramStatus(programID)) {
+	if (!checkProgramStatus(programID)) 
+	{
 		return;
 	}
 
 	glUseProgram(programID);
 }
 
-void MyGlWindow::initializeGL() {
+void MyGlWindow::initializeGL() 
+{
 	glewInit();
 	glEnable(GL_DEPTH_TEST);
 	sendDataToOpenGL();
@@ -191,7 +192,8 @@ void MyGlWindow::initializeGL() {
 
  
 
-void MyGlWindow::paintGL() {
+void MyGlWindow::paintGL() 
+{
 
 	//but clearing buffer is expensive, so need to be cleared once
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -202,17 +204,28 @@ void MyGlWindow::paintGL() {
 	GLint yMoveUniformLocation = glGetUniformLocation(programID, "yMove");
 
 	xPosition += 0.1;
+	yPosition -= 0.1;
 	//glClear(GL_DEPTH_BUFFER_BIT);
 	//glClear(GL_COLOR_BUFFER_BIT); //there's a back buffer and a front buffer, if not clear, it will switch
 
 	glUniform1f(xMoveUniformLocation, xPosition);
-	glUniform1f(yMoveUniformLocation, -0.9f);
+	glUniform1f(yMoveUniformLocation, yPosition);
 //	glUniform1f(xMoveUniformLocation, 0.0f);
-
 
 
 	//glDrawArrays(GL_TRIANGLES, 0, 3);
 	//draw a triangle
+	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
+
+	xPosition += 0.2;
+	yPosition -= 0.2;
+	//glClear(GL_DEPTH_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT); //there's a back buffer and a front buffer, if not clear, it will switch
+
+	glUniform1f(xMoveUniformLocation, xPosition);
+	glUniform1f(yMoveUniformLocation, yPosition);
+	//	glUniform1f(xMoveUniformLocation, 0.0f);
+
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
 }
 /*
@@ -223,3 +236,4 @@ void MyGlWindow::paintGL() {
 	}
 	*/
 	//uniform position --> keyboard movement 
+
