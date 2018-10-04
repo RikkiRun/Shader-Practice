@@ -1,4 +1,3 @@
-
 #version 430
 
 in layout(location = 0) vec3 position; 
@@ -18,5 +17,4 @@ void main()
 	theColor = vertexColor;
 	theColor.x = xMove;
 	theColor.y = yMove;
-
 }

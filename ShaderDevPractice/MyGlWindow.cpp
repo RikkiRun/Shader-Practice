@@ -2,76 +2,59 @@
 #include <iostream>
 #include <fstream>
 #include <MyGlWindow.h>
+#include <glm\glm.hpp>
+#include <Vertex.h> 
+#include <glm\gtc\matrix_transform.hpp>
+#include <ShapeGenerator.h>
 using namespace std;
+using glm::vec3;
+using glm::mat4;
 
 extern const char* vertexShaderCode;
 extern const char* fragmentShaderCode;
 
 GLfloat xPosition = 0.0f;
+GLfloat yPosition = 0.0f;
+
+
+
+const uint NUM_VERTICES_PER_TRU = 3;
+const uint NUM_FLOATS_PER_VERTICE = 6;
+const uint VERTEX_BYTE_SIZE = NUM_FLOATS_PER_VERTICE * sizeof(float);
+
 GLuint programID;
 
 void sendDataToOpenGL() {
 
-
-	GLfloat theTri[] = {
-	-1.0f, 1.0f, 0.0f,
-	0.6f, 0.0f, 0.8f,
-
-	-1.0f, 0.9f, 0.0f,
-	0.8f, 0.0f, 0.2f,
-
-	-0.9f, 0.9f, 0.0f,
-	0.5f, 0.0f, 0.7f,
-	};
-
+	ShapeDate shape = ShapeGenerator::makeTriangle();
 
 	GLuint vertexBufferID; // vertex bufferID
 
 	glGenBuffers(1, &vertexBufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(theTri), theTri, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, shape.vertexBufferSize(), shape.vertices, GL_STATIC_DRAW);
+	
 	//glBufferData(GL_ARRAY_BUFFER, MAX_TRIS * TRIANGLE_BYTE_SIZE, NULL, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0); //position
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0); //GL_FALSE: Not normalize data; stride: where the data begins, the first position to the second position
-
 	// describe color attribute1
 	glEnableVertexAttribArray(1); //color
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (char*)(sizeof(float) * 3)); // last one: 2 float until we get to the beginning of the color data
 
 
-	//indices
-	GLushort indices[] = { 0, 1, 2 }; // glushort for saving memory
 	GLuint indexBufferID; // element bufferID
 	glGenBuffers(1, &indexBufferID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, shape.indexBufferSize(), shape.indices, GL_STATIC_DRAW);
 }
 
-/*
-void sendAnotherTriToOpenGL() {
-
-	GLfloat thisTri[] = {
-		1.0f, 1.0f, 0.0f,
-		0.6f, 0.0f, 0.8f,
-
-		 0.0f, 1.0f, 0.0f,
-		0.8f, 0.0f, 0.2f,
-
-		 -1.0f, 0.0f, 0.0f,
-		0.5f, 0.0f, 0.7f,
-	};
-
-	glBufferSubData(GL_ARRAY_BUFFER,
-		TRIANGLE_BYTE_SIZE * numTris, TRIANGLE_BYTE_SIZE, thisTri);
-	numTris++;
-}
-*/
 
 
 bool checkStatus(GLint objectID,
 	PFNGLGETSHADERIVPROC objectPropertyGetterFunc,
 	PFNGLGETSHADERINFOLOGPROC getInfoLogFunc,
-	GLenum statusType) {
+	GLenum statusType) 
+{
 
 	GLint status; // only 1 status
 	objectPropertyGetterFunc(objectID, statusType, &status);
@@ -91,7 +74,8 @@ bool checkStatus(GLint objectID,
 
 }
 
-bool checkShaderStatus(GLuint shaderID) {
+bool checkShaderStatus(GLuint shaderID) 
+{
 	/*
 	//get GLSL compiler error
 	GLint compilerStatus; // only 1 status
@@ -114,7 +98,8 @@ bool checkShaderStatus(GLuint shaderID) {
 	return checkStatus(shaderID, glGetShaderiv, glGetShaderInfoLog, GL_COMPILE_STATUS);
 }
 
-bool checkProgramStatus(GLuint programID) {
+bool checkProgramStatus(GLuint programID) 
+{
 	/*
 	GLint linkStatus;
 	glGetProgramiv(programID, GL_LINK_STATUS, &linkStatus);
@@ -135,7 +120,8 @@ bool checkProgramStatus(GLuint programID) {
 
 }
 
-string  readShaderCode(const char* fileName) {
+string  readShaderCode(const char* fileName) 
+{
 	ifstream meInput(fileName);
 	if (!meInput.good()) {
 		cout << "File failed to load ..." << fileName;
@@ -149,7 +135,8 @@ string  readShaderCode(const char* fileName) {
 }
 
 
-void installShaders() {
+void installShaders() 
+{
 	programID = glCreateProgram();
 
 	GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -181,7 +168,8 @@ void installShaders() {
 	glUseProgram(programID);
 }
 
-void MyGlWindow::initializeGL() {
+void MyGlWindow::initializeGL() 
+{
 	glewInit();
 	glEnable(GL_DEPTH_TEST);
 	sendDataToOpenGL();
@@ -191,7 +179,8 @@ void MyGlWindow::initializeGL() {
 
  
 
-void MyGlWindow::paintGL() {
+void MyGlWindow::paintGL() 
+{
 
 	//but clearing buffer is expensive, so need to be cleared once
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -202,19 +191,41 @@ void MyGlWindow::paintGL() {
 	GLint yMoveUniformLocation = glGetUniformLocation(programID, "yMove");
 
 	xPosition += 0.1;
+	yPosition -= 0.1;
 	//glClear(GL_DEPTH_BUFFER_BIT);
 	//glClear(GL_COLOR_BUFFER_BIT); //there's a back buffer and a front buffer, if not clear, it will switch
 
-	glUniform1f(xMoveUniformLocation, xPosition);
-	glUniform1f(yMoveUniformLocation, -0.9f);
+	glUniform1f(xMoveUniformLocation, xPosition_1);
+	glUniform1f(yMoveUniformLocation, yPosition_1);
 //	glUniform1f(xMoveUniformLocation, 0.0f);
 
-
-
-	//glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 	//draw a triangle
+	printf("xPosition_1: %f\n", xPosition_1);
+	printf("yPosition_1: %f\n", yPosition_1);
+	//glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
+
+	xPosition += 0.2;
+	yPosition -= 0.4;
+	//glClear(GL_DEPTH_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT); //there's a back buffer and a front buffer, if not clear, it will switch
+
+	glUniform1f(xMoveUniformLocation, xPosition_2);
+	glUniform1f(yMoveUniformLocation, yPosition_2);
+	printf("xPosition_2: %f\n", xPosition_2);
+	printf("yPosition_2: %f\n", yPosition_2);
+
+	//	glUniform1f(xMoveUniformLocation, 0.0f);
+
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
 }
+/*
+void MyGlWindow::InjectUniformValue(GLfloat x_move, GLfloat y_move)
+{
+
+}
+
+*/
 /*
 //draw a new triangle every new frame
 	sendAnotherTriToOpenGL();
@@ -223,3 +234,4 @@ void MyGlWindow::paintGL() {
 	}
 	*/
 	//uniform position --> keyboard movement 
+
