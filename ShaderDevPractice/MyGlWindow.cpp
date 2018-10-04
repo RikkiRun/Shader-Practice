@@ -24,6 +24,8 @@ void sendDataToOpenGL()
 {
 	ShapeDate shape = ShapeGenerator::makeCube();
 
+
+
 	GLuint vertexBufferID; // vertex bufferID
 
 	glGenBuffers(1, &vertexBufferID);
