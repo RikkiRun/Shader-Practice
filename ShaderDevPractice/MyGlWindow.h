@@ -3,18 +3,23 @@
 #define MY_GL_WINDOW
 
 #include <QtOpenGL\qglwidget>
+#include <Qt\qtimer.h>
 
 
 class MyGlWindow : public QGLWidget
 {
 public:
-	//MyGlWindow() { initializeGL(); };
+	MyGlWindow();
+	~MyGlWindow();
 
 protected:
 	void initializeGL() override;
 	void paintGL() override;
-public:
+	void timerEvent(QTimerEvent * e);
 
+	void mouseMoveEvent(QMouseEvent *event);
+public:
+	void doNothinbg();
 
 };
 

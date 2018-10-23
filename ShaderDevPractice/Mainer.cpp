@@ -9,4 +9,5 @@ int main(int argc, char* argv[]) {
 	MyGlWindow myWindow;
 	myWindow.show();
 	return app.exec();
+	myWindow.startTimer(50);
 }

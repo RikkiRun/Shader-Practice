@@ -6,6 +6,11 @@
 #include <Vertex.h> 
 #include <glm\gtc\matrix_transform.hpp>
 #include <ShapeGenerator.h>
+#include <cstdlib>
+#include <glm\gtx\transform.hpp>
+#include <ctime>
+#include <QtGui\QMouseEvent>
+
 using namespace std;
 using glm::vec3;
 using glm::mat4;
@@ -19,6 +24,8 @@ extern const char* fragmentShaderCode;
 
 GLuint programID;
 GLuint numIndices;
+
+GLfloat cubeRotChange = +0.0f;
 
 void sendDataToOpenGL() 
 {
@@ -168,7 +175,14 @@ void installShaders()
 		return;
 	}
 
+	glDeleteShader(vertexShaderID);
+	glDeleteShader(fragmentShaderID);
 	glUseProgram(programID);
+}
+
+MyGlWindow::MyGlWindow()
+{
+	setMouseTracking(true);
 }
 
 void MyGlWindow::initializeGL() 
@@ -180,24 +194,65 @@ void MyGlWindow::initializeGL()
 }
 
 
- 
+void MyGlWindow::timerEvent(QTimerEvent *e)
+{
+	cubeRotChange += 4;
+	//printf("%f/n", cubeRotChange);
+	repaint();
+	
+}
+
+void MyGlWindow::mouseMoveEvent(QMouseEvent *event)
+{
+	printf("mouseTest");
+}
+
+void MyGlWindow::doNothinbg()
+{
+	printf("mouseDoNoting");
+}
 
 void MyGlWindow::paintGL() 
 {
-
 	//but clearing buffer is expensive, so need to be cleared once
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, width(), height());
-
-	mat4 translationMatrix = glm::translate(mat4(), vec3(0.0f, 0.0f, -3.0f));
-	mat4 rotationMatrix = glm::rotate(mat4(), 45.0f, vec3(1.0f, 0.0f, 0.0f));
+	
+	mat4 fullTransformMatrix;
+	GLint fullTransformMatrixUniformLocation;
+	// width / height -- > aspect rat
 	mat4 projectionMartrix = glm::perspective(60.0f, ((float)width()) / height(), 0.1f, 10.0f);
 
-	mat4 fullTransformMatrix = projectionMartrix * translationMatrix * rotationMatrix;
+	// the order of translation, rotation and perspective matters
+	//cube1
+	mat4 translationMatrix = glm::translate(vec3(-1.0f, 0.0f, -3.0f));
+	//mat4 rotationMatrix = glm::rotate(120.0f, vec3(1.0f, 0.0f, 0.0f));
+	mat4 rotationMatrix = glm::rotate(mat4(), cubeRotChange, vec3(1.0f, 1.0f, 1.0f));
 
-	GLint  fullTransformMatrixUniformLocation = glGetUniformLocation(programID, "fullTransformMatrix");
+
+	// projection * translation * rotation --> vertex rotrates first, then translates, then project! 
+	fullTransformMatrix = projectionMartrix * translationMatrix * rotationMatrix;
+
+	fullTransformMatrixUniformLocation = glGetUniformLocation(programID, "fullTransformMatrix"); // first cube
+	
 
 	glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1, GL_FALSE, &fullTransformMatrix[0][0]);
-
+	cubeRotChange += 4;
+	printf("%f/n", cubeRotChange);
 	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0);
+
+	//have 2 cubes with different rotation and translation.
+	// cube 2 : change the rotation and the translation. do the fullTransfromMatrix again and draw the element again
+	translationMatrix = glm::translate(vec3(1.0, 0.0, -3.75));
+	rotationMatrix = glm::rotate(126.0f, vec3(0.0f, 1.0f, 0.0f));
+	fullTransformMatrix = projectionMartrix * translationMatrix * rotationMatrix;
+	glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1, GL_FALSE, &fullTransformMatrix[0][0]);
+	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0);
+
+}
+
+MyGlWindow::~MyGlWindow()
+{
+	glUseProgram(0);
+	glDeleteProgram(programID);
 }
