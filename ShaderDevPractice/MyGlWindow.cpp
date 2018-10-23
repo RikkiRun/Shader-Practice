@@ -27,7 +27,7 @@ GLuint numIndices;
 
 GLfloat cubeRotChange = +0.0f;
 
-void sendDataToOpenGL() 
+void MyGlWindow::sendDataToOpenGL() 
 {
 	ShapeDate shape = ShapeGenerator::makeCube();
 
@@ -55,6 +55,31 @@ void sendDataToOpenGL()
 	numIndices = shape.numIndices;
 
 	shape.cleanup();
+
+	GLuint transformationMatrixBufferID;
+	glGenBuffers(1, &transformationMatrixBufferID);
+	glBindBuffer(GL_ARRAY_BUFFER, transformationMatrixBufferID);
+
+	mat4 projectionMatrix = glm::perspective(60.0f, ((float)width()) / height(), 0.1f, 10.0f);
+	mat4 fullTransforms[] =
+	{
+		projectionMatrix * glm::translate(vec3(-1.0f, 0.0f, -3.0f)) * glm::rotate(36.0f, vec3(1.0f, 0.0f, 0.0f)),
+		projectionMatrix * glm::translate(vec3(1.0f, 0.0f, -3.00f)) * glm::rotate(46.0f, vec3(0.0f, 1.0f, 0.0f)),
+	};
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(fullTransforms), fullTransforms, GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 0));
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 4));
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 8));
+	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 12));
+	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
+	glEnableVertexAttribArray(4);
+	glEnableVertexAttribArray(5);
+	glVertexAttribDivisor(2, 1);
+	glVertexAttribDivisor(3, 1);
+	glVertexAttribDivisor(4, 1);
+	glVertexAttribDivisor(5, 1);
 }
 
 
@@ -82,7 +107,7 @@ bool checkStatus(GLint objectID,
 
 }
 
-bool checkShaderStatus(GLuint shaderID)
+bool MyGlWindow::checkShaderStatus(GLuint shaderID)
 {
 	/*
 	//get GLSL compiler error
@@ -106,7 +131,7 @@ bool checkShaderStatus(GLuint shaderID)
 	return checkStatus(shaderID, glGetShaderiv, glGetShaderInfoLog, GL_COMPILE_STATUS);
 }
 
-bool checkProgramStatus(GLuint programID)
+bool MyGlWindow::checkProgramStatus(GLuint programID)
 {
 	/*
 	GLint linkStatus;
@@ -128,7 +153,7 @@ bool checkProgramStatus(GLuint programID)
 
 }
 
-string  readShaderCode(const char* fileName)
+string MyGlWindow::readShaderCode(const char* fileName)
 {
 	ifstream meInput(fileName);
 	if (!meInput.good()) {
@@ -143,7 +168,7 @@ string  readShaderCode(const char* fileName)
 }
 
 
-void installShaders() 
+void MyGlWindow::installShaders() 
 {
 	programID = glCreateProgram();
 
@@ -218,37 +243,18 @@ void MyGlWindow::paintGL()
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, width(), height());
 	
-	mat4 fullTransformMatrix;
-	GLint fullTransformMatrixUniformLocation;
-	// width / height -- > aspect rat
-	mat4 projectionMartrix = glm::perspective(60.0f, ((float)width()) / height(), 0.1f, 10.0f);
-
-	// the order of translation, rotation and perspective matters
-	//cube1
-	mat4 translationMatrix = glm::translate(vec3(-1.0f, 0.0f, -3.0f));
-	//mat4 rotationMatrix = glm::rotate(120.0f, vec3(1.0f, 0.0f, 0.0f));
-	mat4 rotationMatrix = glm::rotate(mat4(), cubeRotChange, vec3(1.0f, 1.0f, 1.0f));
-
-
-	// projection * translation * rotation --> vertex rotrates first, then translates, then project! 
-	fullTransformMatrix = projectionMartrix * translationMatrix * rotationMatrix;
-
-	fullTransformMatrixUniformLocation = glGetUniformLocation(programID, "fullTransformMatrix"); // first cube
+//	mat4 rotationMatrix = glm::rotate(mat4(), cubeRotChange, vec3(1.0f, 1.0f, 1.0f));
 	
-
-	glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1, GL_FALSE, &fullTransformMatrix[0][0]);
+	/*
+	custom rotation of the cube
 	cubeRotChange += 4;
 	printf("%f/n", cubeRotChange);
 	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0);
+	*/
 
 	//have 2 cubes with different rotation and translation.
 	// cube 2 : change the rotation and the translation. do the fullTransfromMatrix again and draw the element again
-	translationMatrix = glm::translate(vec3(1.0, 0.0, -3.75));
-	rotationMatrix = glm::rotate(126.0f, vec3(0.0f, 1.0f, 0.0f));
-	fullTransformMatrix = projectionMartrix * translationMatrix * rotationMatrix;
-	glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1, GL_FALSE, &fullTransformMatrix[0][0]);
-	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0);
-
+	glDrawElementsInstanced(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0, 2);
 }
 
 MyGlWindow::~MyGlWindow()

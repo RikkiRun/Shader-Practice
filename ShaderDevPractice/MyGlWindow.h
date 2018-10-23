@@ -9,8 +9,14 @@
 class MyGlWindow : public QGLWidget
 {
 public:
+	void sendDataToOpenGL();
+	bool checkShaderStatus(GLuint shaderID);
+	bool checkProgramStatus(GLuint programID);
+	std::string readShaderCode(const char * fileName);
+	void installShaders();
 	MyGlWindow();
 	~MyGlWindow();
+
 
 protected:
 	void initializeGL() override;
