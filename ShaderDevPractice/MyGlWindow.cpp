@@ -216,7 +216,7 @@ void MyGlWindow::installShaders()
 	glAttachShader(programID, fragmentShaderID);
 
 	//binding position before linking
-	glBindAttribLocation(programID, 2, "position");
+//	glBindAttribLocation(programID, 2, "position");
 
 	glLinkProgram(programID);
 
@@ -225,9 +225,9 @@ void MyGlWindow::installShaders()
 		return;
 	}
 
-	GLint posiitonLocation = glGetAttribLocation(programID, "position");
-	GLint colorLocation = glGetAttribLocation(programID, "vertexColor");
-	GLint transformLocation = glGetAttribLocation(programID, "fullTransformMatrix");
+	//	GLint posiitonLocation = glGetAttribLocation(programID, "position");
+	//	GLint colorLocation = glGetAttribLocation(programID, "vertexColor");
+	//	GLint transformLocation = glGetAttribLocation(programID, "fullTransformMatrix");
 
 
 	glDeleteShader(vertexShaderID);
