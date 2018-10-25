@@ -4,8 +4,13 @@
 #include <MyGlWindow.h>
 #include <glm\glm.hpp>
 #include <Vertex.h> 
+#include <glm\gtx\transform.hpp>
 #include <glm\gtc\matrix_transform.hpp>
 #include <ShapeGenerator.h>
+#include <cstdlib>
+#include <ctime>
+#include <QtGui\QMouseEvent>
+
 using namespace std;
 using glm::vec3;
 using glm::mat4;
@@ -20,7 +25,8 @@ extern const char* fragmentShaderCode;
 GLuint programID;
 GLuint numIndices;
 
-void sendDataToOpenGL() 
+
+void MyGlWindow::sendDataToOpenGL()
 {
 	ShapeDate shape = ShapeGenerator::makeCube();
 
@@ -48,6 +54,53 @@ void sendDataToOpenGL()
 	numIndices = shape.numIndices;
 
 	shape.cleanup();
+
+	GLuint transformationMatrixBufferID;
+	glGenBuffers(1, &transformationMatrixBufferID);
+	glBindBuffer(GL_ARRAY_BUFFER, transformationMatrixBufferID);
+	
+	mat4 projectionMartrix = glm::perspective(60.0f, ((float)width()) / height(), 0.1f, 10.0f);
+	//cubeRotChange += 4;
+
+	////??????????????????????????????????????????????????????????????????????
+/*
+	mat4 fullTransform[] =
+	{
+		 projectionMartrix * glm::translate(mat4(), vec3(0.0f, 1.0f, 3.0f))
+			 * glm::rotate(mat4(), cubeRotChange, vec3(1.0f, 1.0f, 1.0f)),
+
+		projectionMartrix * glm::translate(mat4(), vec3(0.0f, 0.0f, 0.0f))
+			* glm::rotate(mat4(), cubeRotChange, vec3(0.0f, 1.0f, 0.0f))
+	};
+
+	
+	////??????????????????????????????????????????????????????????????????????
+*/
+
+	mat4 fullTransform[] = 
+	{
+		projectionMartrix * glm::translate(vec3(-1.0f, 0.0f, -3.0f)) * glm::rotate(36.0f, vec3(1.0f, cubeRotChange, 0.0f)),
+		projectionMartrix * glm::translate(vec3(1.0f, 0.0f, -3.75f)) * glm::rotate(126.0f, vec3(0.0f, 1.0f, 0.0f))
+	};
+
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(fullTransform), fullTransform, GL_STATIC_DRAW);
+	//pointer: offset in the buffer
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 0));
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 4));
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 8));
+	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 12));
+
+	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
+	glEnableVertexAttribArray(4);
+	glEnableVertexAttribArray(5);
+
+	glVertexAttribDivisor(2, 1);
+	glVertexAttribDivisor(3, 1);
+	glVertexAttribDivisor(4, 1);
+	glVertexAttribDivisor(5, 1);
+
 }
 
 
@@ -75,7 +128,7 @@ bool checkStatus(GLint objectID,
 
 }
 
-bool checkShaderStatus(GLuint shaderID)
+bool MyGlWindow::checkShaderStatus(GLuint shaderID)
 {
 	/*
 	//get GLSL compiler error
@@ -121,7 +174,7 @@ bool checkProgramStatus(GLuint programID)
 
 }
 
-string  readShaderCode(const char* fileName)
+string  MyGlWindow::readShaderCode(const char* fileName)
 {
 	ifstream meInput(fileName);
 	if (!meInput.good()) {
@@ -136,7 +189,7 @@ string  readShaderCode(const char* fileName)
 }
 
 
-void installShaders() 
+void MyGlWindow::installShaders()
 {
 	programID = glCreateProgram();
 
@@ -161,6 +214,10 @@ void installShaders()
 
 	glAttachShader(programID, vertexShaderID);
 	glAttachShader(programID, fragmentShaderID);
+
+	//binding position before linking
+	glBindAttribLocation(programID, 2, "position");
+
 	glLinkProgram(programID);
 
 	if (!checkProgramStatus(programID)) 
@@ -168,7 +225,21 @@ void installShaders()
 		return;
 	}
 
+	GLint posiitonLocation = glGetAttribLocation(programID, "position");
+	GLint colorLocation = glGetAttribLocation(programID, "vertexColor");
+	GLint transformLocation = glGetAttribLocation(programID, "fullTransformMatrix");
+
+
+	glDeleteShader(vertexShaderID);
+	glDeleteShader(fragmentShaderID);
+
+
 	glUseProgram(programID);
+}
+
+MyGlWindow::MyGlWindow()
+{
+	setMouseTracking(true);
 }
 
 void MyGlWindow::initializeGL() 
@@ -180,7 +251,30 @@ void MyGlWindow::initializeGL()
 }
 
 
- 
+void MyGlWindow::timerEvent(QTimerEvent *e)
+{
+	cubeRotChange += 4;
+	printf("%f/n", cubeRotChange);
+	repaint();
+	
+}
+
+void MyGlWindow::mouseMoveEvent(QMouseEvent *event)
+{
+	printf("mouseTest");
+}
+
+void MyGlWindow::doNothinbg()
+{
+	printf("mouseDoNoting");
+}
+
+MyGlWindow::~MyGlWindow() 
+{
+	glUseProgram(0);
+	glDeleteShader(programID);
+
+}
 
 void MyGlWindow::paintGL() 
 {
@@ -189,15 +283,6 @@ void MyGlWindow::paintGL()
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, width(), height());
 
-	mat4 translationMatrix = glm::translate(mat4(), vec3(0.0f, 0.0f, -3.0f));
-	mat4 rotationMatrix = glm::rotate(mat4(), 45.0f, vec3(1.0f, 0.0f, 0.0f));
-	mat4 projectionMartrix = glm::perspective(60.0f, ((float)width()) / height(), 0.1f, 10.0f);
+	glDrawElementsInstanced(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0, 2);
 
-	mat4 fullTransformMatrix = projectionMartrix * translationMatrix * rotationMatrix;
-
-	GLint  fullTransformMatrixUniformLocation = glGetUniformLocation(programID, "fullTransformMatrix");
-
-	glUniformMatrix4fv(fullTransformMatrixUniformLocation, 1, GL_FALSE, &fullTransformMatrix[0][0]);
-
-	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0);
-}
+} 
