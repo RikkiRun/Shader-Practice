@@ -6,6 +6,7 @@
     <ClCompile Include="MyShaderCode.cpp" />
     <ClCompile Include="MyWidget.cpp" />
     <ClCompile Include="ShapeGenerator.cpp" />
+    <ClCompile Include="Camera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyGlWindow.h" />
@@ -17,6 +18,8 @@
       <Filter>Primitives</Filter>
     </ClInclude>
     <ClInclude Include="ShapeGenerator.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Camera.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="VertexShaderCode.glsl" />
@@ -27,5 +30,8 @@
     <Filter Include="Primitives">
       <UniqueIdentifier>{06459e3e-0313-4fe5-88c4-e21573d43114}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ShaderDevPractice.rc" />
   </ItemGroup>
 </Project>

@@ -24,7 +24,6 @@ protected:
 
 private:
 	GLfloat cubeRotChange = +0.0f;
-	  ;
 
 };
 

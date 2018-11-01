@@ -9,6 +9,7 @@
 #include <ShapeGenerator.h>
 #include <cstdlib>
 #include <ctime>
+#include "Camera.h"
 #include <QtGui\QMouseEvent>
 
 using namespace std;
@@ -24,6 +25,9 @@ extern const char* fragmentShaderCode;
 
 GLuint programID;
 GLuint numIndices;
+
+Camera camera;
+
 
 
 void MyGlWindow::sendDataToOpenGL()
@@ -59,7 +63,6 @@ void MyGlWindow::sendDataToOpenGL()
 	glGenBuffers(1, &transformationMatrixBufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, transformationMatrixBufferID);
 	
-	mat4 projectionMartrix = glm::perspective(60.0f, ((float)width()) / height(), 0.1f, 10.0f);
 	//cubeRotChange += 4;
 
 	////??????????????????????????????????????????????????????????????????????
@@ -77,14 +80,9 @@ void MyGlWindow::sendDataToOpenGL()
 	////??????????????????????????????????????????????????????????????????????
 */
 
-	mat4 fullTransform[] = 
-	{
-		projectionMartrix * glm::translate(vec3(-1.0f, 0.0f, -3.0f)) * glm::rotate(36.0f, vec3(1.0f, cubeRotChange, 0.0f)),
-		projectionMartrix * glm::translate(vec3(1.0f, 0.0f, -3.75f)) * glm::rotate(126.0f, vec3(0.0f, 1.0f, 0.0f))
-	};
 
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(fullTransform), fullTransform, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(mat4) * 2, 0, GL_DYNAMIC_DRAW);
 	//pointer: offset in the buffer
 	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 0));
 	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 4));
@@ -259,8 +257,10 @@ void MyGlWindow::timerEvent(QTimerEvent *e)
 	
 }
 
-void MyGlWindow::mouseMoveEvent(QMouseEvent *event)
+void MyGlWindow::mouseMoveEvent(QMouseEvent* event)
 {
+	camera.mouseUpdate(glm::vec2(event->x(), event->y()));
+
 	printf("mouseTest");
 }
 
@@ -278,6 +278,13 @@ MyGlWindow::~MyGlWindow()
 
 void MyGlWindow::paintGL() 
 {
+	mat4 projectionMartrix = glm::perspective(60.0f, ((float)width()) / height(), 0.1f, 10.0f);
+	mat4 fullTransform[] =
+	{
+		projectionMartrix * camera.getWorldToViewMatrix() * glm::translate(vec3(-1.0f, 0.0f, -3.0f)) * glm::rotate(36.0f, vec3(1.0f, 0.0f, 0.0f)),
+		projectionMartrix * camera.getWorldToViewMatrix() * glm::translate(vec3(1.0f, 0.0f, -3.75f)) * glm::rotate(126.0f, vec3(0.0f, 1.0f, 0.0f))
+	};
+	glBufferData(GL_ARRAY_BUFFER, sizeof(fullTransform), fullTransform, GL_DYNAMIC_DRAW);
 
 	//but clearing buffer is expensive, so need to be cleared once
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
