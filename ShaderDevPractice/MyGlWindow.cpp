@@ -9,8 +9,9 @@
 #include <ShapeGenerator.h>
 #include <cstdlib>
 #include <ctime>
-#include "Camera.h"
 #include <QtGui\QMouseEvent>
+#include <QtGui\QKeyEvent>
+#include "Camera.h"
 
 using namespace std;
 using glm::vec3;
@@ -267,6 +268,32 @@ void MyGlWindow::mouseMoveEvent(QMouseEvent* event)
 void MyGlWindow::doNothinbg()
 {
 	printf("mouseDoNoting");
+}
+
+void MyGlWindow::keyPressEvent(QKeyEvent* e) 
+{
+	switch (e->key())
+	{
+	case Qt::Key::Key_W:
+		camera.moveForward();
+		break;
+	case Qt::Key::Key_S:
+		camera.moveBackward();
+		break;
+	case Qt::Key::Key_A:
+		camera.strafeLeft();
+		break;
+	case Qt::Key::Key_D:
+		camera.strafeRight();
+		break;
+	case Qt::Key::Key_R:
+		camera.moveUp();
+		break;
+	case Qt::Key::Key_F:
+		camera.moveDown();
+		break;
+	}
+	repaint();
 }
 
 MyGlWindow::~MyGlWindow() 

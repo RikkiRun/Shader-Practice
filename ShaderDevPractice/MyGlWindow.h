@@ -21,6 +21,7 @@ protected:
 	void paintGL() override;
 	void timerEvent(QTimerEvent * e);
 	void mouseMoveEvent(QMouseEvent *event);
+	void keyPressEvent(QKeyEvent *);
 
 private:
 	GLfloat cubeRotChange = +0.0f;
