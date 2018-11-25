@@ -15,6 +15,7 @@ public:
 	MyGlWindow();
 	~MyGlWindow();
 	void doNothinbg();
+	void setupVertexArrays();
 
 protected:
 	void initializeGL() override;
