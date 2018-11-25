@@ -25,7 +25,6 @@ extern const char* vertexShaderCode;
 extern const char* fragmentShaderCode;
 
 GLuint programID;
-//GLuint numIndices;
 GLuint cubeNumIndices;
 GLuint arrowNumIndices;
 
@@ -238,7 +237,7 @@ void MyGlWindow::mouseMoveEvent(QMouseEvent* event)
 
 void MyGlWindow::doNothinbg()
 {
-	printf("mouseDoNoting");
+	printf("mouseDoNoting"); //testing mouse 
 }
 
 void MyGlWindow::keyPressEvent(QKeyEvent* e) 
@@ -289,8 +288,8 @@ void MyGlWindow::paintGL()
 
 	// cubes
 	glBindBuffer(GL_ARRAY_BUFFER, cubeVertexBufferID);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, 0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, (char*)(sizeof(float) * 3));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (char*)(sizeof(float) * 3));
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeIndexBufferID);
 
 	mat4 cube1modelToWorldMatrix = 
@@ -305,12 +304,10 @@ void MyGlWindow::paintGL()
 	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &fullTransformMatrix[0][0]);
 	glDrawElements(GL_TRIANGLES, cubeNumIndices, GL_UNSIGNED_SHORT, 0);
 
-
 	// arrow 
-
 	glBindBuffer(GL_ARRAY_BUFFER, arrowVertexBufferID);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, 0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, (char*)(sizeof(float) * 3));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, (char*)(sizeof(float) * 3));
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, arrowIndexBufferID);
 
 	mat4 arrowModelToWorldMatrix = 
