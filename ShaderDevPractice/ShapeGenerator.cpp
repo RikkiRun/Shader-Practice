@@ -5,6 +5,59 @@
 // get the size of the array and return the number of bytes in the array / the first element of the array
 using glm::vec3;
 
+glm::vec3 randomColor()
+{
+	glm::vec3 ret;
+	ret.x = rand() / (float)RAND_MAX;
+	ret.y = rand() / (float)RAND_MAX;
+	ret.z = rand() / (float)RAND_MAX;
+	return ret;
+}
+
+
+ShapeDate ShapeGenerator::makePlaneVerts(uint dimensions)
+{
+	ShapeDate ret;
+	ret.numVertices = dimensions * dimensions;
+	int half = dimensions / 2;
+	ret.vertices = new Vertex[ret.numVertices];
+	for (int i = 0; i < dimensions; i++)
+	{
+		for (int j = 0; j < dimensions; j++)
+		{
+			Vertex& thisVert = ret.vertices[i * dimensions + j];
+			thisVert.position.x = j - half;
+			thisVert.position.z = i - half;
+			thisVert.position.y = 0;
+			thisVert.color = randomColor();
+		}
+	}
+	return ret;
+}
+
+ShapeDate ShapeGenerator::makePlaneIndices(uint dimensions)
+{
+	ShapeDate ret;
+	ret.numIndices = (dimensions - 1) * (dimensions - 1) * 2 * 3; // 2 triangles per square, 3 indices per triangle
+	ret.indices = new unsigned short[ret.numIndices];
+	int runner = 0;
+	for (int row = 0; row < dimensions - 1; row++)
+	{
+		for (int col = 0; col < dimensions - 1; col++)
+		{
+			ret.indices[runner++] = dimensions * row + col;
+			ret.indices[runner++] = dimensions * row + col + dimensions;
+			ret.indices[runner++] = dimensions * row + col + dimensions + 1;
+
+			ret.indices[runner++] = dimensions * row + col;
+			ret.indices[runner++] = dimensions * row + col + dimensions + 1;
+			ret.indices[runner++] = dimensions * row + col + 1;
+		}
+	}
+	assert(runner = ret.numIndices);
+	return ret;
+}
+
 ShapeDate ShapeGenerator::makeTriangle()
 {
 	ShapeDate ret;
@@ -240,4 +293,18 @@ ShapeDate ShapeGenerator::makeArrow()
 	ret.indices = new GLushort[ret.numIndices];
 	memcpy(ret.indices, stackIndices, sizeof(stackIndices));
 	return ret;
+}
+
+ShapeDate ShapeGenerator::makePlane(uint dimensions)
+{
+	ShapeDate ret = makePlaneVerts(dimensions);
+	ShapeDate ret2 = makePlaneIndices(dimensions);
+	ret.numIndices = ret2.numIndices;
+	ret.indices = ret2.indices;
+	return ret;
+}
+
+ShapeDate ShapeGenerator::makeTeapot(uint tesslation, const glm::mat4 & lidTransform)
+{
+	return ShapeDate();
 }
