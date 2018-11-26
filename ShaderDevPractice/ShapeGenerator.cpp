@@ -21,6 +21,7 @@ ShapeDate ShapeGenerator::makeTriangle()
 		glm::vec3(+0.5f, +0.0f, +0.7f),
 	};
 
+
 	ret.numVertices = NUM_ARRAY_ELEMENTS(theTri);
 	ret.vertices = new Vertex[ret.numVertices];
 	memcpy(ret.vertices, theTri, sizeof(theTri));
