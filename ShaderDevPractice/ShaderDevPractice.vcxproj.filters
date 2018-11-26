@@ -6,6 +6,7 @@
     <ClCompile Include="MyShaderCode.cpp" />
     <ClCompile Include="MyWidget.cpp" />
     <ClCompile Include="ShapeGenerator.cpp" />
+    <ClCompile Include="Camera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyGlWindow.h" />
@@ -17,6 +18,8 @@
       <Filter>Primitives</Filter>
     </ClInclude>
     <ClInclude Include="ShapeGenerator.h" />
+    <ClInclude Include="TeapotData.h" />
+    <ClInclude Include="Camera.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="VertexShaderCode.glsl" />

@@ -1,7 +1,7 @@
 #include "MyWidget.h"
 #include <MyGlWindow.h>
 #include <QtGui\qvboxlayout>
- 
+
 /*
 
 MyWidget::MyWidget() {

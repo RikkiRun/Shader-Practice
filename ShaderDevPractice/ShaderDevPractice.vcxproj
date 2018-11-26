@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Mainer.cpp" />
     <ClCompile Include="MyGlWindow.cpp" />
     <ClCompile Include="MyShaderCode.cpp" />
@@ -26,6 +27,8 @@
     <ClCompile Include="ShapeGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="TeapotData.h" />
     <ClInclude Include="MyGlWindow.h" />
     <ClInclude Include="MyWidget.h" />
     <ClInclude Include="ShapeData.h" />
