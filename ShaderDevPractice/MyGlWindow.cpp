@@ -284,12 +284,6 @@ void MyGlWindow::keyPressEvent(QKeyEvent* e)
 	repaint();
 }
 
-MyGlWindow::~MyGlWindow() 
-{
-	glUseProgram(0);
-	glDeleteShader(programID);
-
-}
 
 void MyGlWindow::paintGL() 
 {
@@ -328,3 +322,12 @@ void MyGlWindow::paintGL()
 	glDrawElements(GL_TRIANGLES, arrowNumIndices, GL_UNSIGNED_SHORT, (void*)arrowIndexDataByteOffset);
 
 } 
+
+
+MyGlWindow::~MyGlWindow()
+{
+	glDeleteBuffers(1, &theBufferID);
+	glUseProgram(0);
+	glDeleteShader(programID);
+
+}
