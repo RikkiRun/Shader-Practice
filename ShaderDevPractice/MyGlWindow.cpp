@@ -43,7 +43,7 @@ Camera camera;
 
 void MyGlWindow::sendDataToOpenGL()
 {
-	ShapeDate cube = ShapeGenerator::makePlane();
+	ShapeDate cube = ShapeGenerator::makeTeapot();
 	ShapeDate arrow = ShapeGenerator::makeArrow();
 
 	glGenBuffers(1, &theBufferID);
@@ -232,6 +232,7 @@ void MyGlWindow::initializeGL()
 {
 	glewInit();
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 	sendDataToOpenGL();
 	installShaders();
 	fullTransformationUniformLocation = glGetUniformLocation(programID, "fullTransformMatrix");

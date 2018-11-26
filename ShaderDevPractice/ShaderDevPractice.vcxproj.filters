@@ -20,6 +20,7 @@
     <ClInclude Include="ShapeGenerator.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="TeapotData.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="VertexShaderCode.glsl" />
