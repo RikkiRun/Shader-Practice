@@ -1,8 +1,8 @@
-`#version 430
+#version 430
 
-in layout(location = 0) vec3 position; 
+in layout(location = 0) vec3 vertexPositionModel; 
 in layout(location = 1) vec3 vertexColor;
-in layout(location = 2) vec3 normal;
+in layout(location = 2) vec3 normalModel;
 uniform vec3 ambientLight;
 
 
@@ -15,8 +15,8 @@ out vec3 thePosition;
 
 void main()
 {
-	vec4 v = vec4(position, 1.0);
+	vec4 v = vec4(vertexPositionModel, 1.0);
 	gl_Position = fullTransformMatrix * v;
-	theNormal = normal;
+	theNormal = vec3(modelToWorldTransformMatrix * vec4(normalModel, 0));
 	thePosition = vec3 (modelToWorldTransformMatrix * v);
 }
