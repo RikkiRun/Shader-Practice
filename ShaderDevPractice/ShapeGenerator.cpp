@@ -2,6 +2,7 @@
 #include <Vertex.h>
 #include <glm.hpp>
 #include <TeapotData.h>
+
 #define NUM_ARRAY_ELEMENTS(a) sizeof(a) / sizeof(*a)
 // get the size of the array and return the number of bytes in the array / the first element of the array
 using glm::vec3;
@@ -32,6 +33,7 @@ ShapeDate ShapeGenerator::makePlaneVerts(uint dimensions)
 			thisVert.position.x = j - half;
 			thisVert.position.z = i - half;
 			thisVert.position.y = 0;
+			thisVert.normal = glm::vec3(0, 1, 0);
 			thisVert.color = randomColor();
 		}
 	}
@@ -93,60 +95,85 @@ ShapeDate ShapeGenerator::makeTriangle()
 ShapeDate ShapeGenerator::makeCube()
 {
 	ShapeDate ret;
-	Vertex stackVerts[] = {
-		vec3(-1.0f, +1.0f, +1.0f), // 0
-		vec3(+1.0f, +0.0f, +0.0f), // Color
-		vec3(+1.0f, +1.0f, +1.0f), // 1
-		vec3(+0.0f, +1.0f, +0.0f), // Color
-		vec3(+1.0f, +1.0f, -1.0f), // 2
-		vec3(+0.0f, +0.0f, +1.0f), // Color
-		vec3(-1.0f, +1.0f, -1.0f), // 3
-		vec3(+1.0f, +1.0f, +1.0f), // Color
+	Vertex stackVerts[] =
+	{
+		vec3(-1.0f, +1.0f, +1.0f),  // 0
+		vec3(+1.0f, +0.0f, +0.0f),	// Color
+		vec3(+0.0f, +1.0f, +0.0f),  // Normal
+		vec3(+1.0f, +1.0f, +1.0f),  // 1
+		vec3(+0.0f, +1.0f, +0.0f),	// Color
+		vec3(+0.0f, +1.0f, +0.0f),  // Normal
+		vec3(+1.0f, +1.0f, -1.0f),  // 2
+		vec3(+0.0f, +0.0f, +1.0f),  // Color
+		vec3(+0.0f, +1.0f, +0.0f),  // Normal
+		vec3(-1.0f, +1.0f, -1.0f),  // 3
+		vec3(+1.0f, +1.0f, +1.0f),  // Color
+		vec3(+0.0f, +1.0f, +0.0f),  // Normal
 
-		vec3(-1.0f, +1.0f, -1.0f), // 4
-		vec3(+1.0f, +0.0f, +1.0f), // Color
-		vec3(+1.0f, +1.0f, -1.0f), // 5
-		vec3(+0.0f, +0.5f, +0.2f), // Color
-		vec3(+1.0f, -1.0f, -1.0f), // 6
-		vec3(+0.8f, +0.6f, +0.4f), // Color
-		vec3(-1.0f, -1.0f, -1.0f), // 7
-		vec3(+0.3f, +1.0f, +0.5f), // Color
+		vec3(-1.0f, +1.0f, -1.0f),  // 4
+		vec3(+1.0f, +0.0f, +1.0f),  // Color
+		vec3(+0.0f, +0.0f, -1.0f),  // Normal
+		vec3(+1.0f, +1.0f, -1.0f),  // 5
+		vec3(+0.0f, +0.5f, +0.2f),  // Color
+		vec3(+0.0f, +0.0f, -1.0f),  // Normal
+		vec3(+1.0f, -1.0f, -1.0f),  // 6
+		vec3(+0.8f, +0.6f, +0.4f),  // Color
+		vec3(+0.0f, +0.0f, -1.0f),  // Normal
+		vec3(-1.0f, -1.0f, -1.0f),  // 7
+		vec3(+0.3f, +1.0f, +0.5f),  // Color
+		vec3(+0.0f, +0.0f, -1.0f),  // Normal
 
-		vec3(+1.0f, +1.0f, -1.0f), // 8
-		vec3(+0.2f, +0.5f, +0.2f), // Color
-		vec3(+1.0f, +1.0f, +1.0f), // 9
-		vec3(+0.9f, +0.3f, +0.7f), // Color
-		vec3(+1.0f, -1.0f, +1.0f), // 10
-		vec3(+0.3f, +0.7f, +0.5f), // Color
-		vec3(+1.0f, -1.0f, -1.0f), // 11
-		vec3(+0.5f, +0.7f, +0.5f), // Color
+		vec3(+1.0f, +1.0f, -1.0f),  // 8
+		vec3(+0.2f, +0.5f, +0.2f),  // Color
+		vec3(+1.0f, +0.0f, +0.0f),  // Normal
+		vec3(+1.0f, +1.0f, +1.0f),  // 9
+		vec3(+0.9f, +0.3f, +0.7f),  // Color
+		vec3(+1.0f, +0.0f, +0.0f),  // Normal
+		vec3(+1.0f, -1.0f, +1.0f),  // 10
+		vec3(+0.3f, +0.7f, +0.5f),  // Color
+		vec3(+1.0f, +0.0f, +0.0f),  // Normal
+		vec3(+1.0f, -1.0f, -1.0f),  // 11
+		vec3(+0.5f, +0.7f, +0.5f),  // Color
+		vec3(+1.0f, +0.0f, +0.0f),  // Normal
 
-		vec3(-1.0f, +1.0f, +1.0f), // 12
-		vec3(+0.7f, +0.8f, +0.2f), // Color
-		vec3(-1.0f, +1.0f, -1.0f), // 13
-		vec3(+0.5f, +0.7f, +0.3f), // Color
-		vec3(-1.0f, -1.0f, -1.0f), // 14
-		vec3(+0.4f, +0.7f, +0.7f), // Color
-		vec3(-1.0f, -1.0f, +1.0f), // 15
-		vec3(+0.2f, +0.5f, +1.0f), // Color
+		vec3(-1.0f, +1.0f, +1.0f),  // 12
+		vec3(+0.7f, +0.8f, +0.2f),  // Color
+		vec3(-1.0f, +0.0f, +0.0f),  // Normal
+		vec3(-1.0f, +1.0f, -1.0f),  // 13
+		vec3(+0.5f, +0.7f, +0.3f),  // Color
+		vec3(-1.0f, +0.0f, +0.0f),  // Normal
+		vec3(-1.0f, -1.0f, -1.0f),  // 14
+		vec3(+0.4f, +0.7f, +0.7f),  // Color
+		vec3(-1.0f, +0.0f, +0.0f),  // Normal
+		vec3(-1.0f, -1.0f, +1.0f),  // 15
+		vec3(+0.2f, +0.5f, +1.0f),  // Color
+		vec3(-1.0f, +0.0f, +0.0f),  // Normal
 
-		vec3(+1.0f, +1.0f, +1.0f), // 16
-		vec3(+0.6f, +1.0f, +0.7f), // Color
-		vec3(-1.0f, +1.0f, +1.0f), // 17
-		vec3(+0.6f, +0.4f, +0.8f), // Color
-		vec3(-1.0f, -1.0f, +1.0f), // 18
-		vec3(+0.2f, +0.8f, +0.7f), // Color
-		vec3(+1.0f, -1.0f, +1.0f), // 19
-		vec3(+0.2f, +0.7f, +1.0f), // Color
+		vec3(+1.0f, +1.0f, +1.0f),  // 16
+		vec3(+0.6f, +1.0f, +0.7f),  // Color
+		vec3(+0.0f, +0.0f, +1.0f),  // Normal
+		vec3(-1.0f, +1.0f, +1.0f),  // 17
+		vec3(+0.6f, +0.4f, +0.8f),  // Color
+		vec3(+0.0f, +0.0f, +1.0f),  // Normal
+		vec3(-1.0f, -1.0f, +1.0f),  // 18
+		vec3(+0.2f, +0.8f, +0.7f),  // Color
+		vec3(+0.0f, +0.0f, +1.0f),  // Normal
+		vec3(+1.0f, -1.0f, +1.0f),  // 19
+		vec3(+0.2f, +0.7f, +1.0f),  // Color
+		vec3(+0.0f, +0.0f, +1.0f),  // Normal
 
-		vec3(+1.0f, -1.0f, -1.0f), // 20
-		vec3(+0.8f, +0.3f, +0.7f), // Color
-		vec3(-1.0f, -1.0f, -1.0f), // 21
-		vec3(+0.8f, +0.9f, +0.5f), // Color
-		vec3(-1.0f, -1.0f, +1.0f), // 22
-		vec3(+0.5f, +0.8f, +0.5f), // Color
-		vec3(+1.0f, -1.0f, +1.0f), // 23
-		vec3(+0.9f, +1.0f, +0.2f), // Color
+		vec3(+1.0f, -1.0f, -1.0f),  // 20
+		vec3(+0.8f, +0.3f, +0.7f),  // Color
+		vec3(+0.0f, -1.0f, +0.0f),  // Normal
+		vec3(-1.0f, -1.0f, -1.0f),  // 21
+		vec3(+0.8f, +0.9f, +0.5f),  // Color
+		vec3(+0.0f, -1.0f, +0.0f),  // Normal
+		vec3(-1.0f, -1.0f, +1.0f),  // 22
+		vec3(+0.5f, +0.8f, +0.5f),  // Color
+		vec3(+0.0f, -1.0f, +0.0f),  // Normal
+		vec3(+1.0f, -1.0f, +1.0f),  // 23
+		vec3(+0.9f, +1.0f, +0.2f),  // Color
+		vec3(+0.0f, -1.0f, +0.0f),  // Normal
 	};
 
 	ret.numVertices = NUM_ARRAY_ELEMENTS(stackVerts);
@@ -176,93 +203,133 @@ ShapeDate ShapeGenerator::makeArrow()
 		// Top side of arrow head
 	vec3(+0.00f, +0.25f, -0.25f),         // 0
 	vec3(+1.00f, +0.00f, +0.00f),		  // Color
+	vec3(+0.00f, +1.00f, +0.00f),		  //normal
 	vec3(+0.50f, +0.25f, -0.25f),         // 1
 	vec3(+1.00f, +0.00f, +0.00f),		  // Color
+	vec3(+0.00f, +1.00f, +0.00f),		  //normal
 	vec3(+0.00f, +0.25f, -1.00f),         // 2
 	vec3(+1.00f, +0.00f, +0.00f),		  // Color
+	vec3(+0.00f, +1.00f, +0.00f),		  //normal
 	vec3(-0.50f, +0.25f, -0.25f),         // 3
 	vec3(+1.00f, +0.00f, +0.00f),		  // Color
+	vec3(+0.00f, +1.00f, +0.00f),		  //normal
 	// Bottom side of arrow head
 	vec3(+0.00f, -0.25f, -0.25f),         // 4
 	vec3(+0.00f, +0.00f, +1.00f),		  // Color
+	vec3(+0.00f, -1.00f, +0.00f),		  //normal
 	vec3(+0.50f, -0.25f, -0.25f),         // 5
 	vec3(+0.00f, +0.00f, +1.00f),		  // Color
+	vec3(+0.00f, -1.00f, +0.00f),		  //normal
 	vec3(+0.00f, -0.25f, -1.00f),         // 6
 	vec3(+0.00f, +0.00f, +1.00f),		  // Color
+	vec3(+0.00f, -1.00f, +0.00f),		  //normal
 	vec3(-0.50f, -0.25f, -0.25f),         // 7
 	vec3(+0.00f, +0.00f, +1.00f),		  // Color
+	vec3(+0.00f, -1.00f, +0.00f),		  //normal
 	// Right side of arrow tip
 	vec3(+0.50f, +0.25f, -0.25f),         // 8
 	vec3(+0.60f, +1.00f, +0.00f),		  // Color
+	vec3(0.83205032f, 0.00f, -0.55470026f), // Normal
 	vec3(+0.00f, +0.25f, -1.00f),         // 9
 	vec3(+0.60f, +1.00f, +0.00f),		  // Color
+	vec3(0.83205032f, 0.00f, -0.55470026f), // Normal
 	vec3(+0.00f, -0.25f, -1.00f),         // 10
 	vec3(+0.60f, +1.00f, +0.00f),		  // Color
+	vec3(0.83205032f, 0.00f, -0.55470026f), // Normal
 	vec3(+0.50f, -0.25f, -0.25f),         // 11
 	vec3(+0.60f, +1.00f, +0.00f),		  // Color
+	vec3(0.83205032f, 0.00f, -0.55470026f), // Normal
 	// Left side of arrow tip
 	vec3(+0.00f, +0.25f, -1.00f),         // 12
 	vec3(+0.00f, +1.00f, +0.00f),		  // Color
+	vec3(-0.55708605f, 0.00f, -0.37139067f), // Normal
 	vec3(-0.50f, +0.25f, -0.25f),         // 13
 	vec3(+0.00f, +1.00f, +0.00f),		  // Color
+	vec3(-0.55708605f, 0.00f, -0.37139067f), // Normal
 	vec3(+0.00f, -0.25f, -1.00f),         // 14
 	vec3(+0.00f, +1.00f, +0.00f),		  // Color
+	vec3(-0.55708605f, 0.00f, -0.37139067f), // Normal
 	vec3(-0.50f, -0.25f, -0.25f),         // 15
 	vec3(+0.00f, +1.00f, +0.00f),		  // Color
+	vec3(-0.55708605f, 0.00f, -0.37139067f), // Normal
 	// Back side of arrow tip
 	vec3(-0.50f, +0.25f, -0.25f),         // 16
 	vec3(+0.50f, +0.50f, +0.50f),		  // Color
+	vec3(+0.00f, +0.00f, +1.00f),         // Normal
 	vec3(+0.50f, +0.25f, -0.25f),         // 17
 	vec3(+0.50f, +0.50f, +0.50f),		  // Color
+	vec3(+0.00f, +0.00f, +1.00f),         // Normal
 	vec3(-0.50f, -0.25f, -0.25f),         // 18
 	vec3(+0.50f, +0.50f, +0.50f),		  // Color
+	vec3(+0.00f, +0.00f, +1.00f),         // Normal
 	vec3(+0.50f, -0.25f, -0.25f),         // 19
 	vec3(+0.50f, +0.50f, +0.50f),		  // Color
+	vec3(+0.00f, +0.00f, +1.00f),         // Normal
 	// Top side of back of arrow
 	vec3(+0.25f, +0.25f, -0.25f),         // 20
 	vec3(+1.00f, +0.00f, +0.00f),		  // Color
+	vec3(+0.00f, +1.00f, +0.00f),         // Normal
 	vec3(+0.25f, +0.25f, +1.00f),         // 21
 	vec3(+1.00f, +0.00f, +0.00f),		  // Color
+	vec3(+0.00f, +1.00f, +0.00f),         // Normal
 	vec3(-0.25f, +0.25f, +1.00f),         // 22
 	vec3(+1.00f, +0.00f, +0.00f),		  // Color
+	vec3(+0.00f, +1.00f, +0.00f),         // Normal
 	vec3(-0.25f, +0.25f, -0.25f),         // 23
 	vec3(+1.00f, +0.00f, +0.00f),		  // Color
+	vec3(+0.00f, +1.00f, +0.00f),         // Normal
 	// Bottom side of back of arrow
 	vec3(+0.25f, -0.25f, -0.25f),         // 24
 	vec3(+0.00f, +0.00f, +1.00f),		  // Color
+	vec3(+0.00f, -1.00f, +0.00f),         // Normal
 	vec3(+0.25f, -0.25f, +1.00f),         // 25
 	vec3(+0.00f, +0.00f, +1.00f),		  // Color
+	vec3(+0.00f, -1.00f, +0.00f),         // Normal
 	vec3(-0.25f, -0.25f, +1.00f),         // 26
 	vec3(+0.00f, +0.00f, +1.00f),		  // Color
+	vec3(+0.00f, -1.00f, +0.00f),         // Normal
 	vec3(-0.25f, -0.25f, -0.25f),         // 27
 	vec3(+0.00f, +0.00f, +1.00f),		  // Color
+	vec3(+0.00f, -1.00f, +0.00f),         // Normal
 	// Right side of back of arrow
 	vec3(+0.25f, +0.25f, -0.25f),         // 28
 	vec3(+0.60f, +1.00f, +0.00f),		  // Color
+	vec3(+1.00f, +0.00f, +0.00f),         // Normal
 	vec3(+0.25f, -0.25f, -0.25f),         // 29
 	vec3(+0.60f, +1.00f, +0.00f),		  // Color
+	vec3(+1.00f, +0.00f, +0.00f),         // Normal
 	vec3(+0.25f, -0.25f, +1.00f),         // 30
 	vec3(+0.60f, +1.00f, +0.00f),		  // Color
+	vec3(+1.00f, +0.00f, +0.00f),         // Normal
 	vec3(+0.25f, +0.25f, +1.00f),         // 31
 	vec3(+0.60f, +1.00f, +0.00f),		  // Color
+	vec3(+1.00f, +0.00f, +0.00f),         // Normal
 	// Left side of back of arrow
 	vec3(-0.25f, +0.25f, -0.25f),         // 32
 	vec3(+0.00f, +1.00f, +0.00f),		  // Color
+	vec3(-1.00f, +0.00f, +0.00f),         // Normal
 	vec3(-0.25f, -0.25f, -0.25f),         // 33
 	vec3(+0.00f, +1.00f, +0.00f),		  // Color
+	vec3(-1.00f, +0.00f, +0.00f),         // Normal
 	vec3(-0.25f, -0.25f, +1.00f),         // 34
 	vec3(+0.00f, +1.00f, +0.00f),		  // Color
+	vec3(-1.00f, +0.00f, +0.00f),         // Normal
 	vec3(-0.25f, +0.25f, +1.00f),         // 35
 	vec3(+0.00f, +1.00f, +0.00f),		  // Color
+	vec3(-1.00f, +0.00f, +0.00f),         // Normal
 	// Back side of back of arrow
 	vec3(-0.25f, +0.25f, +1.00f),         // 36
 	vec3(+0.50f, +0.50f, +0.50f),		  // Color
+	vec3(+0.00f, +0.00f, +1.00f),         // Normal
 	vec3(+0.25f, +0.25f, +1.00f),         // 37
 	vec3(+0.50f, +0.50f, +0.50f),		  // Color
+	vec3(+0.00f, +0.00f, +1.00f),         // Normal
 	vec3(-0.25f, -0.25f, +1.00f),         // 38
 	vec3(+0.50f, +0.50f, +0.50f),		  // Color
+	vec3(+0.00f, +0.00f, +1.00f),         // Normal
 	vec3(+0.25f, -0.25f, +1.00f),         // 39
 	vec3(+0.50f, +0.50f, +0.50f),		  // Color
+	vec3(+0.00f, +0.00f, +1.00f),         // Normal
 	};
 
 	GLushort stackIndices[] = {
@@ -332,8 +399,35 @@ ShapeDate ShapeGenerator::makeTeapot(uint tesselation, const glm::mat4& lidTrans
 		v.position.y = vertices[i * 3 + 1];
 		v.position.z = vertices[i * 3 + 2];
 		v.color = randomColor();
+		v.normal.x = normals[i * 3 + 0];
+		v.normal.y = normals[i * 3 + 1];
+		v.normal.z = normals[i * 3 + 2];
 
 	}
+	return ret;
+}
+
+ShapeDate ShapeGenerator::generateNormals(const ShapeDate & data)
+{
+	ShapeDate ret;
+	ret.numVertices = data.numVertices * 2;
+	ret.vertices = new Vertex[ret.numVertices];
+	glm::vec3 white(1.0f, 1.0f, 1.0f);
+	for (int i = 0; i < data.numVertices; i++)
+	{
+		uint vertIndex = i * 2;
+		Vertex& v1 = ret.vertices[vertIndex];
+		Vertex& v2 = ret.vertices[vertIndex + 1];
+		const Vertex& sourceVertex = data.vertices[i];
+		v1.position = sourceVertex.position;
+		v2.position = sourceVertex.position + sourceVertex.normal;
+		v1.color = v2.color = white;
+	}
+
+	ret.numIndices = ret.numVertices;
+	ret.indices = new GLushort[ret.numIndices];
+	for (int i = 0; i < ret.numIndices; i++)
+		ret.indices[i] = i;
 	return ret;
 }
 
@@ -479,7 +573,6 @@ void ShapeGenerator::buildPatch(glm::vec3 patch[][4],
 	}
 }
 
-#include "TeapotData.h"
 
 void ShapeGenerator::getPatch(int patchNum, glm::vec3 patch[][4], bool reverseV)
 {

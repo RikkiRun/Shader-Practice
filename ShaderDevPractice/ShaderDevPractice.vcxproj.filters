@@ -31,4 +31,7 @@
       <UniqueIdentifier>{06459e3e-0313-4fe5-88c4-e21573d43114}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="texture\flower.jpg" />
+  </ItemGroup>
 </Project>

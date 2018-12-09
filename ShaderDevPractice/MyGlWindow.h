@@ -24,7 +24,7 @@ protected:
 	void keyPressEvent(QKeyEvent *);
 
 private:
-	GLfloat cubeRotChange = +0.0f;
+	GLfloat teapotRotChange = +0.0f;
 
 };
 
