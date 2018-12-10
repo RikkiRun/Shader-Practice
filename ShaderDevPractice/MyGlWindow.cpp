@@ -17,6 +17,7 @@
 using namespace std;
 using glm::vec3;
 using glm::mat4;
+using glm::vec4;
 
 const uint NUM_VERTICES_PER_TRI = 3;
 const uint NUM_FLOATS_PER_VERTICE = 9;
@@ -415,8 +416,8 @@ void MyGlWindow::paintGL()
 
 	//add ambient light
 	GLint ambientLightUniformLocation = glGetUniformLocation(programID, "ambientLight");
-	vec3 ambientLight(1.0f, 1.0f, 1.0f);
-	glUniform3fv(ambientLightUniformLocation, 1, &ambientLight[0]);
+	vec4 ambientLight(0.1f, 0.1f, 0.5f, 1.0f);
+	glUniform4fv(ambientLightUniformLocation, 1, &ambientLight[0]);
 
 	//add light position
 	GLint lightPositionWorldUniformPosition = glGetUniformLocation(programID, "lightPositionWorld");
