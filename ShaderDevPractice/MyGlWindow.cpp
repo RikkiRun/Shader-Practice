@@ -62,7 +62,6 @@ Camera camera;
 const char * theTexture = "flower.jpg";
 
 
-
 void MyGlWindow::sendDataToOpenGL()
 {
 	ShapeDate teapot = ShapeGenerator::makeTeapot();
@@ -329,7 +328,7 @@ void MyGlWindow::installShaders()
 
 	//	GLint posiitonLocation = glGetAttribLocation(programID, "position");
 	//	GLint colorLocation = glGetAttribLocation(programID, "vertexColor");
-	//	GLint transformLocation = glGetAttribLocation(programID, "fullTransformMatrix");
+	//	GLint transformLocation = glGetAttribLocation(programID, "modelToProjectionMatrix");
 
 
 	glDeleteShader(vertexShaderID);
@@ -350,7 +349,7 @@ void MyGlWindow::initializeGL()
 	glEnable(GL_CULL_FACE);
 	sendDataToOpenGL();
 	installShaders();
-	fullTransformationUniformLocation = glGetUniformLocation(programID, "fullTransformMatrix");
+	fullTransformationUniformLocation = glGetUniformLocation(programID, "modelToProjectionMatrix");
 }
 
 
@@ -408,7 +407,7 @@ void MyGlWindow::paintGL()
 	glViewport(0, 0, width(), height());
 	
 
-	mat4 fullTransformMatrix;
+	mat4 modelToProjectionMatrix;
 	mat4 viewToProjectionMatrix =
 		glm::perspective(60.0f, ((float)width()) / height(), 0.1f, 20.0f);
 	mat4 worldToViewMatrix = camera.getWorldToViewMatrix();
@@ -420,13 +419,13 @@ void MyGlWindow::paintGL()
 	glUniform3fv(ambientLightUniformLocation, 1, &ambientLight[0]);
 
 	//add light position
-	GLint lightPositionUniformPosition = glGetUniformLocation(programID, "lightPosition");
-	glm::vec3 lightPosition(0.0f, 1.0f, 0.0f);
-	glUniform3fv(lightPositionUniformPosition, 1, &lightPosition[0]);
+	GLint lightPositionWorldUniformPosition = glGetUniformLocation(programID, "lightPositionWorld");
+	glm::vec3 lightPositionWorld(0.0f, 1.0f, 0.0f);
+	glUniform3fv(lightPositionWorldUniformPosition, 1, &lightPositionWorld[0]);
 
 	// model transform matrix 
 	GLint modelToWorldTransformMatrixUniformLocation =
-		glGetUniformLocation(programID, "modelToWorldTransformMatrix");
+		glGetUniformLocation(programID, "modelToWorldMatrix");
 
 
 
@@ -434,22 +433,22 @@ void MyGlWindow::paintGL()
 	glBindVertexArray(teapotVertexArrayObjectID);
 	mat4 teapot1modelToWorldMatrix =
 		glm::translate(vec3(-3.0f, 0.0f, -6.0f)) * glm::rotate(0.0f, vec3(1.0f, 0.0f, 0.0f));
-	fullTransformMatrix = worldToProjectionMatrix * teapot1modelToWorldMatrix;
-	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &fullTransformMatrix[0][0]);
+	modelToProjectionMatrix = worldToProjectionMatrix * teapot1modelToWorldMatrix;
+	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 //	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
 
 	mat4 teapot2ModelToWorldMatrix =
 		glm::translate(vec3(3.0f, 0.0f, -6.75f)) * glm::rotate(0.0f, vec3(1.0f, 0.0f, 0.0f));
-	fullTransformMatrix = worldToProjectionMatrix * teapot2ModelToWorldMatrix;
-	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &fullTransformMatrix[0][0]);
+	modelToProjectionMatrix = worldToProjectionMatrix * teapot2ModelToWorldMatrix;
+	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 //	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
 
 	// arrow 
 	glBindVertexArray(arrowVertexArrayObjectID);
 	mat4 arrowModelToWorldMatrix =
 		glm::translate(0.0f, 0.0f, -3.0f);
-	fullTransformMatrix = worldToProjectionMatrix * arrowModelToWorldMatrix;
-	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &fullTransformMatrix[0][0]);
+	modelToProjectionMatrix = worldToProjectionMatrix * arrowModelToWorldMatrix;
+	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 	glUniformMatrix4fv(modelToWorldTransformMatrixUniformLocation, 1, GL_FALSE,
 		&arrowModelToWorldMatrix[0][0]);
 	glDrawElements(GL_TRIANGLES, arrowNumIndices, GL_UNSIGNED_SHORT, (void*)arrowIndexDataByteOffset);
@@ -457,8 +456,8 @@ void MyGlWindow::paintGL()
 	//plane
 	glBindVertexArray(planeVertexArrayObjectID);
 	mat4 planeModelToWorldMatrix;
-	fullTransformMatrix = worldToProjectionMatrix * planeModelToWorldMatrix;
-	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &fullTransformMatrix[0][0]);
+	modelToProjectionMatrix = worldToProjectionMatrix * planeModelToWorldMatrix;
+	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 	glUniformMatrix4fv(modelToWorldTransformMatrixUniformLocation, 1, GL_FALSE,
 		&planeModelToWorldMatrix[0][0]);
 	glDrawElements(GL_TRIANGLES, planeNumIndices, GL_UNSIGNED_SHORT, (void*)planeIndexDataByteOffset);
