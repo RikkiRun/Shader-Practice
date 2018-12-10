@@ -18,7 +18,7 @@ glm::vec3 randomColor()
 	return ret;
 }
 
-
+//tyhjgukj
 ShapeDate ShapeGenerator::makePlaneVerts(uint dimensions)
 {
 	ShapeDate ret;
