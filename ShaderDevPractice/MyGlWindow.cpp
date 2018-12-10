@@ -419,6 +419,10 @@ void MyGlWindow::paintGL()
 	vec4 ambientLight(0.1f, 0.1f, 0.5f, 1.0f);
 	glUniform4fv(ambientLightUniformLocation, 1, &ambientLight[0]);
 
+	GLint eyePositionWorldUniformLocation = glGetUniformLocation(programID, "eyePositionWorld");
+	glm::vec3 eyePosition = camera.getPostion();
+	glUniform3fv(eyePositionWorldUniformLocation, 1, &eyePosition[0]);
+
 	//add light position
 	GLint lightPositionWorldUniformPosition = glGetUniformLocation(programID, "lightPositionWorld");
 	glm::vec3 lightPositionWorld(0.0f, 1.0f, 0.0f);

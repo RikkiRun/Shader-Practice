@@ -12,6 +12,9 @@ public:
 	Camera();
 	~Camera();
 	glm::mat4 getWorldToViewMatrix() const;
+	glm::vec3 getPostion() const {
+		return position;
+	};
 	void moveForward();
 	void moveBackward();
 	void strafeLeft();
