@@ -1,53 +1,16 @@
 #include "MyWidget.h"
 #include <MyGlWindow.h>
 #include <QtGui\qvboxlayout>
+#include <QtGui\QHBoxLayout>
+#include <QtGui\qhboxlayout>
+#include <QtGui\qapplication.h>
+#include <QtGui/qwidget.h>
 
-/*
 
 MyWidget::MyWidget() {
-	myGLWindow = new MyGlWindow();
-
-	QVBoxLayout* mainLayout;
-	setLayout(mainLayout = new QVBoxLayout);
-	mainLayout->addWidget(myGLWindow);
+	QVBoxLayout* mainLayout = new QVBoxLayout();
+//	setLayout(mainLayout);
+	QVBoxLayout* controlsLayout;
+	mainLayout->addLayout(controlsLayout = new QVBoxLayout);
+	mainLayout->addWidget(new MyGlWindow);
 }
-
-myWidget::myWidget()
-{
-}
-
-
-myWidget::~myWidget()
-{
-}
-
-
-MyWidget::MyWidget()
-{
-}
-
-
-MyWidget::~MyWidget()
-{
-}
-
-
-MyWidget::MyWidget()
-{
-}
-
-
-MyWidget::~MyWidget()
-{
-}
-
-
-MyWidget::MyWidget()
-{
-}
-
-
-MyWidget::~MyWidget()
-{
-}
-*/

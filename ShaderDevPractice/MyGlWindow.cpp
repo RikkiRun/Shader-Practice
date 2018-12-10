@@ -345,6 +345,7 @@ MyGlWindow::MyGlWindow()
 
 void MyGlWindow::initializeGL()
 {
+	setMaximumSize(1200, 600);
 	glewInit();
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -419,6 +420,7 @@ void MyGlWindow::paintGL()
 	vec4 ambientLight(0.1f, 0.1f, 0.5f, 1.0f);
 	glUniform4fv(ambientLightUniformLocation, 1, &ambientLight[0]);
 
+	// add specular light
 	GLint eyePositionWorldUniformLocation = glGetUniformLocation(programID, "eyePositionWorld");
 	glm::vec3 eyePosition = camera.getPostion();
 	glUniform3fv(eyePositionWorldUniformLocation, 1, &eyePosition[0]);
@@ -440,13 +442,13 @@ void MyGlWindow::paintGL()
 		glm::translate(vec3(-3.0f, 0.0f, -6.0f)) * glm::rotate(0.0f, vec3(1.0f, 0.0f, 0.0f));
 	modelToProjectionMatrix = worldToProjectionMatrix * teapot1modelToWorldMatrix;
 	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
-//	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
+	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
 
 	mat4 teapot2ModelToWorldMatrix =
 		glm::translate(vec3(3.0f, 0.0f, -6.75f)) * glm::rotate(0.0f, vec3(1.0f, 0.0f, 0.0f));
 	modelToProjectionMatrix = worldToProjectionMatrix * teapot2ModelToWorldMatrix;
 	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
-//	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
+	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
 
 	// arrow 
 	glBindVertexArray(arrowVertexArrayObjectID);

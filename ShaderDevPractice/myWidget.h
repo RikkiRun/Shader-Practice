@@ -1,10 +1,11 @@
 
 #ifndef MY_WIDGET
 #define MY_WIDGET
-
-
 #pragma once
-class MyWidget
+
+//#include<QtGui/qwidget.h>
+
+class MyWidget //: public QWidget
 {
 public:
 	MyWidget();
