@@ -9,8 +9,13 @@
 
 MyWidget::MyWidget() {
 	QVBoxLayout* mainLayout = new QVBoxLayout();
-//	setLayout(mainLayout);
+	setLayout(mainLayout);
 	QVBoxLayout* controlsLayout;
 	mainLayout->addLayout(controlsLayout = new QVBoxLayout);
 	mainLayout->addWidget(new MyGlWindow);
+}
+
+MyWidget::~MyWidget()
+{
+
 }

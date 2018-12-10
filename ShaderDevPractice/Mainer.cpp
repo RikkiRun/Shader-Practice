@@ -2,13 +2,13 @@
 #include <Qt\qapplication.h>
 #include<MyGlWindow.h>
 #include<QtGui/qwidget.h>
-
+#include <MyWidget.h>
 
 
 int main(int argc, char* argv[]) {
 	QApplication app(argc, argv);
 	MyGlWindow myWindow;
-	QWidget myWidget;
+//	MyWidget myWidget;
 //	myWidget.show();
 	myWindow.show();
 	myWindow.startTimer(20);

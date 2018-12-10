@@ -25,6 +25,7 @@
     <None Include="VertexShaderCode.glsl" />
     <None Include="FragmentShaderCode.glsl" />
     <None Include="UniformShaderCode.glsl" />
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Primitives">
@@ -33,5 +34,6 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="texture\flower.jpg" />
+    <Image Include="texture\flower.png" />
   </ItemGroup>
 </Project>

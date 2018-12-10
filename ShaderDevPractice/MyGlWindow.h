@@ -15,6 +15,7 @@ public:
 	MyGlWindow();
 	~MyGlWindow();
 	void doNothinbg();
+	void loatTexture();
 
 protected:
 	void initializeGL() override;

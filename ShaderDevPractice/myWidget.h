@@ -3,9 +3,9 @@
 #define MY_WIDGET
 #pragma once
 
-//#include<QtGui/qwidget.h>
+#include<QtGui/qwidget.h>
 
-class MyWidget //: public QWidget
+class MyWidget : public QWidget
 {
 public:
 	MyWidget();
