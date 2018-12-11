@@ -44,6 +44,7 @@
   <ItemGroup>
     <Image Include="texture\flower.jpg" />
     <Image Include="texture\flower.png" />
+    <Image Include="texture\normalMap.png" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

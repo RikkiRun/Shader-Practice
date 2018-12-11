@@ -59,9 +59,6 @@ GLuint fullTransformationUniformLocation;
 
 Camera camera;
 
-//load texture file 
-const char * theTexture = "flower.jpg";
-
 
 void MyGlWindow::sendDataToOpenGL()
 {
@@ -397,7 +394,7 @@ void MyGlWindow::doNothinbg()
 void MyGlWindow::loatTexture()
 {
 	//load texture file
-	const char* texName = "texture/flower.png";
+	const char* texName = "texture/normalMap.png";
 	QImage timg = QGLWidget::convertToGLFormat(QImage(texName, "PNG"));
 
 	//cope file to openGl
@@ -460,8 +457,8 @@ void MyGlWindow::paintGL()
 
 	//add ambient light
 	GLint ambientLightUniformLocation = glGetUniformLocation(programID, "ambientLight");
-	vec4 ambientLight(0.25f, 0.25f, 0.25f, 1.0f);
-	glUniform4fv(ambientLightUniformLocation, 1, &ambientLight[0]);
+	vec3 ambientLight(0.25f, 0.25f, 0.25f);
+	glUniform3fv(ambientLightUniformLocation, 1, &ambientLight[0]);
 
 	// add specular light
 	GLint eyePositionWorldUniformLocation = glGetUniformLocation(programID, "eyePositionWorld");
@@ -496,23 +493,23 @@ void MyGlWindow::paintGL()
 	// arrow 
 	glBindVertexArray(arrowVertexArrayObjectID);
 	mat4 arrowModelToWorldMatrix =
-		glm::translate(0.0f, 3.0f, -3.0f) * glm::scale(2.0f, 2.0f, 2.0f);
+		glm::translate(0.0f, 3.0f, -3.0f) * glm::scale(1.0f, 1.0f, 1.0f);
 	modelToProjectionMatrix = worldToProjectionMatrix * arrowModelToWorldMatrix;
 	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 	glUniformMatrix4fv(modelToWorldTransformMatrixUniformLocation, 1, GL_FALSE,
 		&arrowModelToWorldMatrix[0][0]);
-	glDrawElements(GL_TRIANGLES, arrowNumIndices, GL_UNSIGNED_SHORT, (void*)arrowIndexDataByteOffset);
+//	glDrawElements(GL_TRIANGLES, arrowNumIndices, GL_UNSIGNED_SHORT, (void*)arrowIndexDataByteOffset);
 
 	//plane
 	glBindVertexArray(planeVertexArrayObjectID);
-	mat4 planeModelToWorldMatrix;
+	mat4 planeModelToWorldMatrix ;
 	modelToProjectionMatrix = worldToProjectionMatrix * planeModelToWorldMatrix;
 	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 	glUniformMatrix4fv(modelToWorldTransformMatrixUniformLocation, 1, GL_FALSE,
 		&planeModelToWorldMatrix[0][0]);
 	glDrawElements(GL_TRIANGLES, planeNumIndices, GL_UNSIGNED_SHORT, (void*)planeIndexDataByteOffset);
 
-	// teapot normals
+	// teapot normals 
 	glBindVertexArray(teapotNormalVertexArrayObjectID);
 	glDrawElements(GL_LINE, teapotNormalIndices, GL_UNSIGNED_SHORT, (void*)teapotNormalIndexDataByteOffset);
 	

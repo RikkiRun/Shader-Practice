@@ -37,6 +37,9 @@ ShapeDate ShapeGenerator::makePlaneVerts(uint dimensions)
 			thisVert.position.z = i - half;
 			thisVert.position.y = 0;
 			thisVert.normal = glm::vec3(0, 1, 0);
+			thisVert.tangent = glm::vec3(1, 0, 0);
+			thisVert.UV.x = j / (float)dimensions;
+			thisVert.UV.y = i / (float)dimensions;
 			thisVert.color = randomColor();
 		}
 	}
