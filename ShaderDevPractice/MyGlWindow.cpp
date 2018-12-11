@@ -59,6 +59,8 @@ GLuint fullTransformationUniformLocation;
 
 Camera camera;
 
+const unsigned int shadowMapWidth = 1024, shadowMapHeight = 1024;
+
 
 void MyGlWindow::sendDataToOpenGL()
 {
@@ -366,7 +368,8 @@ void MyGlWindow::initializeGL()
 	glEnable(GL_CULL_FACE);
 	sendDataToOpenGL();
 	installShaders();
-	loatTexture();
+//	loatTexture();
+	shadowMapping();
 	fullTransformationUniformLocation = glGetUniformLocation(programID, "modelToProjectionMatrix");
 }
 
@@ -394,7 +397,7 @@ void MyGlWindow::doNothinbg()
 void MyGlWindow::loatTexture()
 {
 	//load texture file
-	const char* texName = "texture/normalMap.png";
+	const char* texName = "texture/flower.png";
 	QImage timg = QGLWidget::convertToGLFormat(QImage(texName, "PNG"));
 
 	//cope file to openGl
@@ -413,6 +416,51 @@ void MyGlWindow::loatTexture()
 	else
 		fprintf(stderr, "tex1 not found");
 
+}
+
+void MyGlWindow::shadowMapping()
+{
+	GLfloat border[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+	// the shadow map texture
+	unsigned int depthTex;
+	glGenTextures(1, &depthTex);
+	glBindTexture(GL_TEXTURE_2D, depthTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 
+		shadowMapWidth, shadowMapHeight, 0, 
+		GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+		GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+		GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+		GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+		GL_CLAMP_TO_BORDER);
+	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE,
+		GL_COMPARE_REF_TO_TEXTURE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC,
+		GL_LESS);
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR,
+		border);
+
+	//assign the shadow map to texture channel 0
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, depthTex);
+
+	//create and set up the FBO
+	unsigned int shadowFBO;
+	glGenFramebuffers(1, &shadowFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+		GL_TEXTURE_2D, depthTex, 0);
+
+	GLenum drawBuffers[] = { GL_NONE };
+	glDrawBuffers(1, drawBuffers);
+
+	// Revert to the default frame buffer for now
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void MyGlWindow::keyPressEvent(QKeyEvent* e)
@@ -467,7 +515,7 @@ void MyGlWindow::paintGL()
 
 	//add light position
 	GLint lightPositionWorldUniformPosition = glGetUniformLocation(programID, "lightPositionWorld");
-	glm::vec3 lightPositionWorld(0.0f, 0.5f, 0.0f);
+	glm::vec3 lightPositionWorld(0.0f, 1.0f, 0.0f);
 	glUniform3fv(lightPositionWorldUniformPosition, 1, &lightPositionWorld[0]);
 
 	// model transform matrix 
@@ -482,23 +530,23 @@ void MyGlWindow::paintGL()
 		glm::translate(vec3(-3.0f, 0.0f, -6.0f)) * glm::rotate(0.0f, vec3(1.0f, 0.0f, 0.0f));
 	modelToProjectionMatrix = worldToProjectionMatrix * teapot1modelToWorldMatrix;
 	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
-//	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
+	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
 
 	mat4 teapot2ModelToWorldMatrix =
 		glm::translate(vec3(3.0f, 0.0f, -6.75f)) * glm::rotate(0.0f, vec3(1.0f, 0.0f, 0.0f));
 	modelToProjectionMatrix = worldToProjectionMatrix * teapot2ModelToWorldMatrix;
 	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
-//	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
+	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
 
 	// arrow 
 	glBindVertexArray(arrowVertexArrayObjectID);
 	mat4 arrowModelToWorldMatrix =
-		glm::translate(0.0f, 3.0f, -3.0f) * glm::scale(1.0f, 1.0f, 1.0f);
+		glm::translate(0.0f, 0.0f, 3.0f) * glm::scale(1.0f, 1.0f, 1.0f);
 	modelToProjectionMatrix = worldToProjectionMatrix * arrowModelToWorldMatrix;
 	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 	glUniformMatrix4fv(modelToWorldTransformMatrixUniformLocation, 1, GL_FALSE,
 		&arrowModelToWorldMatrix[0][0]);
-//	glDrawElements(GL_TRIANGLES, arrowNumIndices, GL_UNSIGNED_SHORT, (void*)arrowIndexDataByteOffset);
+	glDrawElements(GL_TRIANGLES, arrowNumIndices, GL_UNSIGNED_SHORT, (void*)arrowIndexDataByteOffset);
 
 	//plane
 	glBindVertexArray(planeVertexArrayObjectID);
