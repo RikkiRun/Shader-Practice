@@ -11,14 +11,28 @@ ShapeDate ShapeGenerator::makeTriangle()
 
 	Vertex theTri[] =
 	{
-		glm::vec3(-1.0f, +1.0f, +0.0f),
-		glm::vec3(+0.6f, +0.0f, +0.8f),
+		//main shape
+		glm::vec3(+0.0f, +0.05f, +0.0f),
+		glm::vec3(+1.0f, +0.0f, +0.0f),
 
-		glm::vec3(-1.0f, +0.9f, +0.0f),
-		glm::vec3(+0.8f, +0.0f, +0.2f),
+		glm::vec3(+0.1f, -0.05f, +0.0f),
+		glm::vec3(+1.0f, +0.0f, +0.0f),
 
-		glm::vec3(-0.9f, +0.9f, +0.0f),
-		glm::vec3(+0.5f, +0.0f, +0.7f),
+		glm::vec3(-0.1f, -0.05f, +0.0f),
+		glm::vec3(+1.0f, +0.0f, +0.0f),
+
+		//background image
+		glm::vec3(+0.0f, +1.0f, +0.0f),
+		glm::vec3(+0.0f, +0.0f, +1.0f),
+
+		glm::vec3(+1.0f, +0.0f, +0.0f),
+		glm::vec3(+0.0f, +0.0f, +1.0f),
+
+		glm::vec3(+0.0f, -1.0f, +0.0f),
+		glm::vec3(+0.0f, +0.0f, +1.0f),
+
+		glm::vec3(-1.0f, +0.0f, +0.0f),
+		glm::vec3(+0.0f, +0.0f, +1.0f),
 	};
 
 	ret.numVertices = NUM_ARRAY_ELEMENTS(theTri);
