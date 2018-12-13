@@ -1,31 +1,41 @@
 #version 430
+out float fragDepth;
+//out vec4 fragColor;
 
-out vec4 daColor;
-
-in mat3 TBNtangentToModel;
 in vec3 normalWorld;
 in vec3 vertexPositionWorld;
-in vec2 TexCoord;
 in vec4 shadowCoord;
-
-
 
 uniform vec3 lightPositionWorld;
 uniform vec3 eyePositionWorld;
 uniform vec3 ambientLight;
 uniform mat4 modelToWorldMatrix;
-uniform sampler2D Tex1;
 uniform sampler2DShadow shadowMap;
 
+//vec3 phongModelDiffAndSpec()
+//{
+//}
+//
+//subroutine void renderPassType();
+//subroutine uniform renderPassType renderPass;
+//subroutine(renderPassType)
+//
+//void shadeWithShadow(){
+//	
+//	float shadow = textureProj(shadowMap, shadowCoord);
+//	fragColor = vec4()
+//}
+//
+//subroutine(renderPassType)
+//
+//void recordDepth()
+//{
+//}
 
 void main()
 {
-//	vec4 normalTextureInfo = normalize(texture(Tex1, TexCoord)*2 - 1);
-//	vec4 testNormalTengent = vec4(0.0, 0.0, 1.0, 0.0);
-//	vec3 normalTextureInfoInObj = TBNtangentToModel * normalTextureInfo.xyz;
-//	vec3 normalTextureInfoInWorld = vec3(modelToWorldMatrix * vec4(normalTextureInfoInObj, 1.0));
-
-
+fragDepth = gl_FragCoord.z;
+//	renderPass();
 	//diffuse
 	vec3 lightVectorWorld = normalize(lightPositionWorld - vertexPositionWorld);
 	float brightness = dot(lightVectorWorld, normalize(normalWorld));
@@ -35,18 +45,21 @@ void main()
 	vec3 reflectedLightVectorWorld = reflect(-lightVectorWorld, normalWorld);
 	vec3 eyeVectorWorld = normalize(eyePositionWorld - vertexPositionWorld);
 	float s = dot(reflectedLightVectorWorld, eyeVectorWorld);
-	s =  pow(s, 50);
+	s =  pow(s, 10);
 	vec4 specularLight = vec4(50*s, 0, 0, 1);
 
+
+	vec4 diffAndSpec = clamp(diffuseLight, 0, 1) + clamp(specularLight, 0, 1);
 	// lookup normal from normal map
 //	vec4 texColor = texture(Tex1, TexCoord);
 
 	//do the shadow map look-up
 	float shadow = textureProj(shadowMap, shadowCoord);
-
-//	daColor = vec4((clamp(specularLight,0,1) + clamp(diffuseLight,0,1)) * shadow + (ambientLight,1.0));
-//	daColor = vec4(shadow  + vec4(ambientLight, 1.0));
-	daColor = vec4(shadow);
-	daColor += vec4(ambientLight,1.0) + clamp(diffuseLight,0,1);
+//	fragColor = vec4(diffAndSpec * shadow + (ambientLight,1.0));
+//	daColor = vec4(specularLight * shadow  + vec4(ambientLight, 1.0));
+//	daColor = texColor;
+//	daColor = vec4(ambientLight,1.0)+ clamp(specularLight,0,1) + clamp(diffuseLight,0,1);
 //	daColor = vec4(normalTextureInfoInWorld.xyz,0.0);
+
+//	fragColor += shadow;
 }

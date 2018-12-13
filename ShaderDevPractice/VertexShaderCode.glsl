@@ -12,35 +12,22 @@ uniform mat4 modelToWorldMatrix;
 uniform mat4 modelToViewMatrix;
 uniform mat4 shadowMatrix;
 
-out mat3 TBNtangentToModel;
 out vec3 normalWorld;
 out vec3 vertexPositionWorld;
-out vec2 TexCoord;
 out vec4 shadowCoord;
-
+uniform mat4 depthMVP;
 
 void main()
 {	
-	TexCoord = UV;
-//	vec3 norm = normalize(normalMatrix * normalModel);
-//	vec3 tang = normalize(normalMatrix * vec3(tangent));
-//	vec3 binormal = normalize(normalMatrix * vec3(tangent));
+//	TexCoord = UV;
 
-//	vec3 biTangentModel = normalize(cross(normalModel, tangent)) * 1;
-//	TBNtangentToModel = mat3(tangent, biTangentModel, normalModel);
-
-	normalWorld = vec3(modelToWorldMatrix * vec4(normalModel, 0));
+	normalWorld = normalize(vec3(modelToWorldMatrix * vec4(normalModel, 0)));
 
 	vertexPositionWorld = vec3 (modelToWorldMatrix * vertexPositionModel);
 
-// shadowmatrix converts from modeling coordinates to shadow map coordinates
+	// shadowmatrix converts from modeling coordinates to shadow map coordinates
 	shadowCoord = shadowMatrix * vertexPositionModel;
-//	mat3 toObjectLocal = mat3(tang.x, binormal.x, norm.x, tang.y, binormal.y, norm.y, tang.z, binormal.z, norm.z );
-//	vec3 pos = vec3( modelToWorldMatrix * vertexPositionModel);
-//	lightDir = normalize(toObjectLocal * (Light.Position.xyz - pos));
-//	viewDir = toObjectLocal * normalize(-pos);
-
-	gl_Position = modelToProjectionMatrix * vertexPositionModel;
-
+		gl_Position = depthMVP * vertexPositionModel;
+//	gl_Position = modelToProjectionMatrix * vertexPositionModel;
 
 }

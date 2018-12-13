@@ -14,8 +14,12 @@
 #include "Camera.h"
 
 
+using std::cerr;
+using std::endl;
+
 using namespace std;
 using glm::vec3;
+using glm::mat3;
 using glm::mat4;
 using glm::vec4;
 
@@ -60,7 +64,9 @@ GLuint fullTransformationUniformLocation;
 Camera camera;
 
 const unsigned int shadowMapWidth = 1024, shadowMapHeight = 1024;
-
+unsigned int depthTex;
+GLfloat border[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+unsigned int shadowFBO;
 
 void MyGlWindow::sendDataToOpenGL()
 {
@@ -224,6 +230,7 @@ void MyGlWindow::sendDataToOpenGL()
 }
 
 
+
 bool checkStatus(GLint objectID,
 	PFNGLGETSHADERIVPROC objectPropertyGetterFunc,
 	PFNGLGETSHADERINFOLOGPROC getInfoLogFunc,
@@ -369,7 +376,7 @@ void MyGlWindow::initializeGL()
 	sendDataToOpenGL();
 	installShaders();
 //	loatTexture();
-	shadowMapping();
+	setupFBO();
 	fullTransformationUniformLocation = glGetUniformLocation(programID, "modelToProjectionMatrix");
 }
 
@@ -418,12 +425,10 @@ void MyGlWindow::loatTexture()
 
 }
 
-void MyGlWindow::shadowMapping()
+void MyGlWindow::setupFBO()
 {
-	GLfloat border[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-
 	// the shadow map texture
-	unsigned int depthTex;
+
 	glGenTextures(1, &depthTex);
 	glBindTexture(GL_TEXTURE_2D, depthTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 
@@ -450,17 +455,24 @@ void MyGlWindow::shadowMapping()
 	glBindTexture(GL_TEXTURE_2D, depthTex);
 
 	//create and set up the FBO
-	unsigned int shadowFBO;
+	
 	glGenFramebuffers(1, &shadowFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
 		GL_TEXTURE_2D, depthTex, 0);
 
-	GLenum drawBuffers[] = { GL_NONE };
-	glDrawBuffers(1, drawBuffers);
+//	GLenum drawBuffers[] = { GL_NONE };
+//	glDrawBuffers(1, drawBuffers);
 
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	
 	// Revert to the default frame buffer for now
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		printf("cant find frame buffer");
+	}
 }
 
 void MyGlWindow::keyPressEvent(QKeyEvent* e)
@@ -492,10 +504,22 @@ void MyGlWindow::keyPressEvent(QKeyEvent* e)
 
 void MyGlWindow::paintGL()
 {
+
+
+	//first render to depth map
+	glViewport(0, 0, shadowMapWidth, shadowMapHeight);
+	glBindFramebuffer(GL_FRAMEBUFFER, depthTex);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	//render
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//render the scene as normal with shadow mapping (using depth map)
+	glViewport(0, 0, width(), height());
 	//but clearing buffer is expensive, so need to be cleared once
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	glViewport(0, 0, width(), height());
+	glBindTexture(GL_TEXTURE_2D, depthTex);
 	
+
 
 	mat4 modelToProjectionMatrix;
 	mat4 viewToProjectionMatrix =
@@ -521,8 +545,6 @@ void MyGlWindow::paintGL()
 	// model transform matrix 
 	GLint modelToWorldTransformMatrixUniformLocation =
 		glGetUniformLocation(programID, "modelToWorldMatrix");
-
-
 
 	// teapots
 	glBindVertexArray(teapotVertexArrayObjectID);
@@ -568,6 +590,18 @@ void MyGlWindow::paintGL()
 
 	// plane normals
 //	glDrawElements(GL_LINE, planeNormalIndices, GL_UNSIGNED_SHORT, (void*)planeNormalVertexArrayByteOffset);
+
+	glm::vec3 lightInvDir = glm::vec3(0.5f, 2, 2);
+
+	glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
+	glm::mat4 depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	glm::mat4 depthModelMatrix = glm::mat4(1.0);
+	glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+
+	GLuint depthModelMatrixID = glGetUniformLocation(programID, "depthMVP");
+	glUniformMatrix4fv(depthModelMatrixID, 1, GL_FALSE, &depthMVP[0][0]);
+
+
 }
 
 

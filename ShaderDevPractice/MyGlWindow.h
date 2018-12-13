@@ -16,7 +16,7 @@ public:
 	~MyGlWindow();
 	void doNothinbg();
 	void loatTexture();
-	void shadowMapping();
+	void setupFBO();
 
 
 protected:
