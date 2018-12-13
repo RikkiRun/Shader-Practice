@@ -12,6 +12,6 @@ int main(int argc, char* argv[]) {
 	myWidget.setFixedSize(512, 512);
 	myWidget.show();
 
-	//myWindow.show();
+//	myWindow.show();
 	return app.exec();
 }

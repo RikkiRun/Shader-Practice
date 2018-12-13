@@ -13,8 +13,6 @@ using glm::mat4;
 extern const char* vertexShaderCode;
 extern const char* fragmentShaderCode;
 
-GLfloat xPosition = 0.0f;
-GLfloat yPosition = 0.0f;
 
 
 
@@ -46,6 +44,8 @@ void sendDataToOpenGL() {
 	glGenBuffers(1, &indexBufferID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, shape.indexBufferSize(), shape.indices, GL_STATIC_DRAW);
+	
+	shape.cleanup();
 }
 
 
@@ -168,7 +168,33 @@ void installShaders()
 	glUseProgram(programID);
 }
 
-void MyGlWindow::initializeGL() 
+void MyGlWindow::initialValueSetter(GLfloat xStart, GLfloat yStart)
+{
+	//	this->xStart = xStart;
+	//	this->yStart = yStart;
+	xStart = +0.0f;
+	yStart = +0.0f;
+}
+
+void MyGlWindow::injectUniformValue(GLfloat xOffset, GLfloat yOffset)
+{
+	xOffset = 0.0f;
+	yOffset = 0.0f;
+	xStart += xOffset;
+	yStart += yOffset;
+}
+
+void MyGlWindow::injectUniformValue_2(GLfloat xOffset, GLfloat yOffset)
+{
+	xOffset = 0.0f;
+	yOffset = 0.0f;
+	xStart2 += xOffset;
+	yStart2 += yOffset;
+}
+
+
+
+void MyGlWindow::initializeGL()
 {
 	glewInit();
 	glEnable(GL_DEPTH_TEST);
@@ -181,7 +207,6 @@ void MyGlWindow::initializeGL()
 
 void MyGlWindow::paintGL() 
 {
-
 	//but clearing buffer is expensive, so need to be cleared once
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, width(), height());
@@ -189,49 +214,25 @@ void MyGlWindow::paintGL()
 
 	GLint xMoveUniformLocation = glGetUniformLocation(programID, "xMove");
 	GLint yMoveUniformLocation = glGetUniformLocation(programID, "yMove");
+	GLint yFlip = glGetUniformLocation(programID, "flip");
 
-	xPosition += 0.1;
-	yPosition -= 0.1;
-	//glClear(GL_DEPTH_BUFFER_BIT);
-	//glClear(GL_COLOR_BUFFER_BIT); //there's a back buffer and a front buffer, if not clear, it will switch
+	// draw triangles
 
-	glUniform1f(xMoveUniformLocation, xPosition_1);
-	glUniform1f(yMoveUniformLocation, yPosition_1);
-//	glUniform1f(xMoveUniformLocation, 0.0f);
-
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-	//draw a triangle
-	printf("xPosition_1: %f\n", xPosition_1);
-	printf("yPosition_1: %f\n", yPosition_1);
-	//glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
-
-	xPosition += 0.2;
-	yPosition -= 0.4;
-	//glClear(GL_DEPTH_BUFFER_BIT);
-	//glClear(GL_COLOR_BUFFER_BIT); //there's a back buffer and a front buffer, if not clear, it will switch
-
-	glUniform1f(xMoveUniformLocation, xPosition_2);
-	glUniform1f(yMoveUniformLocation, yPosition_2);
-	printf("xPosition_2: %f\n", xPosition_2);
-	printf("yPosition_2: %f\n", yPosition_2);
-
-	//	glUniform1f(xMoveUniformLocation, 0.0f);
+	glUniform1f(xMoveUniformLocation, xStart);
+	glUniform1f(yMoveUniformLocation, yStart);
+	printf("xStart: %f\n", xStart);
+	printf("yStart: %f\n", yStart);
 
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
-}
-/*
-void MyGlWindow::InjectUniformValue(GLfloat x_move, GLfloat y_move)
-{
 
-}
+	// draw out line
+	glUniform1f(xMoveUniformLocation, +0.0f);
+	glUniform1f(yMoveUniformLocation, +0.0f);
+	glUniform1f(yFlip, -1.0f);
+	glDrawArrays(GL_TRIANGLES, 3, 4);
+	
+	glUniform1f(yFlip, +1.0f);
+	glDrawArrays(GL_TRIANGLES, 3, 4);
 
-*/
-/*
-//draw a new triangle every new frame
-	sendAnotherTriToOpenGL();
-	glDrawArrays(GL_TRIANGLES, (numTris - 1) * NUM_VERTICES_PER_TRI,
-		numTris * NUM_VERTICES_PER_TRI);
-	}
-	*/
-	//uniform position --> keyboard movement 
 
+}	
