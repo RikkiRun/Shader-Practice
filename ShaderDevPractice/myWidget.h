@@ -11,5 +11,6 @@ public:
 	MyWidget();
 	~MyWidget();
 };
+//test
 
 #endif // !
