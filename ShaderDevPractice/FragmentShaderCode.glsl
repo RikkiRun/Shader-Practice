@@ -18,7 +18,8 @@ uniform sampler2D Tex1;
 
 void main()
 {
-	vec4 normalTextureInfo = normalize(texture(Tex1, TexCoord)*2 - 1);
+	vec2 flippedUV = vec2(TexCoord.x,-TexCoord.y);
+	vec4 normalTextureInfo = normalize(texture(Tex1, flippedUV)*2 - 1);
 	vec4 testNormalTengent = vec4(0.0, 0.0, 1.0, 0.0);
 	vec3 normalTextureInfoInObj = TBNtangentToModel * normalTextureInfo.xyz;
 	vec3 normalTextureInfoInWorld = vec3(modelToWorldMatrix * vec4(normalTextureInfoInObj, 1.0));
@@ -34,7 +35,7 @@ void main()
 	vec3 eyeVectorWorld = normalize(eyePositionWorld - vertexPositionWorld);
 	float s = dot(reflectedLightVectorWorld, eyeVectorWorld);
 	s =  pow(s, 10);
-	vec4 specularLight = vec4(50*s, 0, 0, 1);
+	vec4 specularLight = vec4( s,s, s, 1);
 
 	// lookup normal from normal map
 
