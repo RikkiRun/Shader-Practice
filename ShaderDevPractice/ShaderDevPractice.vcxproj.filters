@@ -26,6 +26,8 @@
     <None Include="FragmentShaderCode.glsl" />
     <None Include="UniformShaderCode.glsl" />
     <None Include="ClassDiagram.cd" />
+    <None Include="cubemapVertexShader.glsl" />
+    <None Include="cubemapFragmentShader.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Primitives">
@@ -36,5 +38,11 @@
     <Image Include="texture\flower.jpg" />
     <Image Include="texture\flower.png" />
     <Image Include="texture\normalMap.png" />
+    <Image Include="texture\back.png" />
+    <Image Include="texture\down.png" />
+    <Image Include="texture\front.png" />
+    <Image Include="texture\left.png" />
+    <Image Include="texture\right.png" />
+    <Image Include="texture\up.png" />
   </ItemGroup>
 </Project>

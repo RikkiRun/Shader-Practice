@@ -16,6 +16,8 @@ public:
 	~MyGlWindow();
 	void doNothinbg();
 	void loatTexture();
+	void loadCubemap();
+	static const char* TexFile[];
 
 protected:
 	void initializeGL() override;

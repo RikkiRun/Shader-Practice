@@ -29,11 +29,15 @@ extern const char* fragmentShaderCode;
 glm::vec3 lightPositionWorld = vec3(0.0f, 0.5f, 0.0f);
 
 GLuint programID;
+GLuint cubemapProgramID;
+
 GLuint teapotNumIndices;
 GLuint arrowNumIndices;
 GLuint planeNumIndices;
 
 GLuint theBufferID;
+GLuint frameBufferID;
+GLuint cubemapBufferID;
 
 GLuint teapotVertexArrayObjectID;
 GLuint arrowVertexArrayObjectID;
@@ -41,6 +45,7 @@ GLuint planeVertexArrayObjectID;
 GLuint teapotIndexDataByteOffset;
 GLuint arrowIndexDataByteOffset;
 GLuint planeIndexDataByteOffset;
+
 
 //normals for plane, arrow and teapot
 GLuint planeNormalIndices;
@@ -61,6 +66,10 @@ GLuint fullTransformationUniformLocation;
 
 Camera camera;
 
+const char* MyGlWindow::TexFile[] = { 
+	"texture/front.png", "texture/back.png", "texture/down.png", 
+	"texture/up.png", "texture/right.png", "texture/left.png" };
+
 
 void MyGlWindow::sendDataToOpenGL()
 {
@@ -71,9 +80,16 @@ void MyGlWindow::sendDataToOpenGL()
 	ShapeDate arrowNormals = ShapeGenerator::generateNormals(arrow);
 	ShapeDate teapotNormals = ShapeGenerator::generateNormals(teapot);
 
-
+	// generate buffer 
 	glGenBuffers(1, &theBufferID);
+//	glGenFramebuffers(1, &frameBufferID);
+
+
+	//bind buffer 
 	glBindBuffer(GL_ARRAY_BUFFER, theBufferID);
+//	glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
+	
+
 	glBufferData(GL_ARRAY_BUFFER,
 		teapot.vertexBufferSize() + teapot.indexBufferSize() +
 		arrow.vertexBufferSize() + arrow.indexBufferSize() +
@@ -307,7 +323,6 @@ string  MyGlWindow::readShaderCode(const char* fileName)
 	);
 }
 
-
 void MyGlWindow::installShaders()
 {
 	programID = glCreateProgram();
@@ -333,26 +348,39 @@ void MyGlWindow::installShaders()
 
 	glAttachShader(programID, vertexShaderID);
 	glAttachShader(programID, fragmentShaderID);
-
 	//binding position before linking
-//	glBindAttribLocation(programID, 2, "position");
-
 	glLinkProgram(programID);
-
 	if (!checkProgramStatus(programID))
 	{
 		return;
 	}
-
-	//	GLint posiitonLocation = glGetAttribLocation(programID, "position");
-	//	GLint colorLocation = glGetAttribLocation(programID, "vertexColor");
-	//	GLint transformLocation = glGetAttribLocation(programID, "modelToProjectionMatrix");
+//	glDeleteShader(vertexShaderID);
+//	glDeleteShader(fragmentShaderID);
 
 
+
+	temp = readShaderCode("cubemapVertexShader.glsl");
+	adapter[0] = temp.c_str();
+	glShaderSource(vertexShaderID, 1, adapter, 0);
+	temp = readShaderCode("cubemapFragmentShader.glsl");
+	adapter[0] = temp.c_str();
+	glShaderSource(fragmentShaderID, 1, adapter, 0);
+	glCompileShader(vertexShaderID);
+	glCompileShader(fragmentShaderID);
+	cubemapProgramID = glCreateProgram();
+	if (!checkShaderStatus(vertexShaderID) || !checkShaderStatus(fragmentShaderID))
+	{
+		return;
+	}
+	glAttachShader(cubemapProgramID, vertexShaderID);
+	glAttachShader(cubemapProgramID, fragmentShaderID);
+	glLinkProgram(cubemapProgramID);
+	if (!checkProgramStatus(cubemapProgramID))
+	{
+		return;
+	}
 	glDeleteShader(vertexShaderID);
 	glDeleteShader(fragmentShaderID);
-
-	glUseProgram(programID);
 }
 
 MyGlWindow::MyGlWindow()
@@ -369,6 +397,7 @@ void MyGlWindow::initializeGL()
 	sendDataToOpenGL();
 	installShaders();
 	loatTexture();
+	loadCubemap();
 	fullTransformationUniformLocation = glGetUniformLocation(programID, "modelToProjectionMatrix");
 }
 
@@ -395,6 +424,7 @@ void MyGlWindow::doNothinbg()
 
 void MyGlWindow::loatTexture()
 {
+	
 	//load texture file
 	const char* texName = "texture/normalMap.png";
 	QImage timg = QGLWidget::convertToGLFormat(QImage(texName, "PNG"));
@@ -410,12 +440,84 @@ void MyGlWindow::loatTexture()
 
 	//set the tex1 sample uniform to refer to texture unit 0
 	int loc = glGetUniformLocation(programID, "Tex1");
-	if (loc >= 0)
+	if (loc >= 0) {
 		glUniform1i(loc, 0);
-	else
+//		cout << loc;
+	}
+	else {
 		fprintf(stderr, "tex1 not found");
+		
+	}
 
 }
+
+void MyGlWindow::loadCubemap()
+{
+	glGenTextures(1, &cubemapBufferID);
+	glUseProgram(cubemapProgramID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapBufferID);
+	// load texture file 
+	glActiveTexture(GL_TEXTURE1);
+	GLuint targerts[] = {
+		GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+		GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+		GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+		GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+		GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+		GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
+	};
+	for (int i = 0; i < 6; ++i) {
+		QImage timg = QGLWidget::convertToGLFormat(QImage(TexFile[i], "PNG"));
+		glTexImage2D( targerts[i], 0, GL_RGBA, timg.width(), timg.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, timg.bits());
+	}
+
+	//typical cube map setting 
+	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+//	//set the tex1 sample uniform to refer to texture unit 0
+//	int loc = glGetUniformLocation(cubemapProgramID, "skybox");
+//	if (loc >= 0) {
+//		glUniform1i(loc, 0);
+//		cout << loc;
+//	}
+//	else {
+//		cout << loc;
+//		fprintf(stderr, "skybox not found!!!");
+//	}
+//	
+//
+//	GLint drawSkyboxUniformLocation = glGetUniformLocation(cubemapProgramID, "drawSkyBox");
+//	glUniform1i(drawSkyboxUniformLocation, 1.0);
+//
+//	cout << drawSkyboxUniformLocation;
+
+	// when drawSkyBox = true, draw a cube
+
+//	mat4 modelToProjectionMatrix;
+//	mat4 viewToProjectionMatrix =
+//		glm::perspective(60.0f, ((float)width()) / height(), 0.1f, 20.0f);
+//	mat4 worldToViewMatrix = camera.getWorldToViewMatrix();
+//	mat4 worldToProjectionMatrix = viewToProjectionMatrix * worldToViewMatrix;
+//	GLint modelToWorldTransformMatrixUniformLocation =
+//		glGetUniformLocation(cubemapProgramID, "modelMatrix");
+//	cout << modelToWorldTransformMatrixUniformLocation;
+//
+//	glBindVertexArray(arrowVertexArrayObjectID);
+//	mat4 arrowModelToWorldMatrix = glm::scale(70.0f, 70.0f, 70.0f);
+//	modelToProjectionMatrix = worldToProjectionMatrix * arrowModelToWorldMatrix;
+//	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
+//	glUniformMatrix4fv(modelToWorldTransformMatrixUniformLocation, 1, GL_FALSE,
+//		&arrowModelToWorldMatrix[0][0]);
+//	//glDrawElements(GL_TRIANGLES, arrowNumIndices, GL_UNSIGNED_SHORT, (void*)arrowIndexDataByteOffset);
+//	glDrawElements(GL_TRIANGLES, arrowNumIndices, GL_UNSIGNED_SHORT, 0);
+
+
+}
+
 
 void MyGlWindow::keyPressEvent(QKeyEvent* e)
 {
@@ -465,14 +567,17 @@ void MyGlWindow::keyPressEvent(QKeyEvent* e)
 
 void MyGlWindow::paintGL()
 {
+
+	glUseProgram(programID);
 	//but clearing buffer is expensive, so need to be cleared once
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, width(), height());
 
 
+
 	mat4 modelToProjectionMatrix;
 	mat4 viewToProjectionMatrix =
-		glm::perspective(60.0f, ((float)width()) / height(), 0.1f, 20.0f);
+		glm::perspective(60.0f, ((float)width()) / height(), 0.1f, 100.0f);
 	mat4 worldToViewMatrix = camera.getWorldToViewMatrix();
 	mat4 worldToProjectionMatrix = viewToProjectionMatrix * worldToViewMatrix;
 
@@ -494,9 +599,7 @@ void MyGlWindow::paintGL()
 	// model transform matrix 
 	GLint modelToWorldTransformMatrixUniformLocation =
 		glGetUniformLocation(programID, "modelToWorldMatrix");
-
-
-
+//	
 	// teapots
 	glBindVertexArray(teapotVertexArrayObjectID);
 	mat4 teapot1modelToWorldMatrix =
@@ -511,16 +614,7 @@ void MyGlWindow::paintGL()
 	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 	//	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
 
-		// arrow 
-	glBindVertexArray(arrowVertexArrayObjectID);
-	mat4 arrowModelToWorldMatrix =
-		glm::translate(0.0f, 3.0f, -3.0f) * glm::scale(1.0f, 1.0f, 1.0f);
-	modelToProjectionMatrix = worldToProjectionMatrix * arrowModelToWorldMatrix;
-	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
-	glUniformMatrix4fv(modelToWorldTransformMatrixUniformLocation, 1, GL_FALSE,
-		&arrowModelToWorldMatrix[0][0]);
-	//	glDrawElements(GL_TRIANGLES, arrowNumIndices, GL_UNSIGNED_SHORT, (void*)arrowIndexDataByteOffset);
-
+	
 		//plane
 	glBindVertexArray(planeVertexArrayObjectID);
 	mat4 planeModelToWorldMatrix;
@@ -532,7 +626,7 @@ void MyGlWindow::paintGL()
 
 	// teapot normals 
 	glBindVertexArray(teapotNormalVertexArrayObjectID);
-	glDrawElements(GL_LINE, teapotNormalIndices, GL_UNSIGNED_SHORT, (void*)teapotNormalIndexDataByteOffset);
+//	glDrawElements(GL_LINE, teapotNormalIndices, GL_UNSIGNED_SHORT, (void*)teapotNormalIndexDataByteOffset);
 
 	//	printf(" %f/n", teapotNormalIndices);
 
@@ -541,6 +635,39 @@ void MyGlWindow::paintGL()
 
 		// plane normals
 	//	glDrawElements(GL_LINE, planeNormalIndices, GL_UNSIGNED_SHORT, (void*)planeNormalVertexArrayByteOffset);
+
+//	cout << modelToWorldTransformMatrixUniformLocation;
+
+	//cubemap
+	glUseProgram(cubemapProgramID);
+
+	
+	//set the tex1 sample uniform to refer to texture unit 0
+	int loc = glGetUniformLocation(cubemapProgramID, "skybox");
+	if (loc >= 0) {
+		glActiveTexture(GL_TEXTURE1);
+		glUniform1i(loc, 1);
+		std::cout << "locOfSkybox: " << loc << std::endl;
+	}
+	else {
+		cout << loc;
+		fprintf(stderr, "skybox not found!!!");
+	}
+	GLint drawSkyboxUniformLocation = glGetUniformLocation(cubemapProgramID, "drawSkyBox");
+	std::cout << "drawskybox: " << drawSkyboxUniformLocation << std::endl;
+//	glUniform1i(drawSkyboxUniformLocation, 1.0);
+	GLint cubemapMVP = glGetUniformLocation(cubemapProgramID, "MVP");
+	std::cout << "mmvvpp: " << cubemapMVP << std::endl;
+
+	glBindVertexArray(arrowVertexArrayObjectID);
+	mat4 arrowModelToWorldMatrix = glm::scale(50.0f, 50.0f, 50.0f);
+	modelToProjectionMatrix = worldToProjectionMatrix * arrowModelToWorldMatrix;
+	glUniformMatrix4fv(cubemapMVP, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
+	
+//	glUniformMatrix4fv(modelToWorldTransformMatrixUniformLocation, 1, GL_FALSE,
+//		&arrowModelToWorldMatrix[0][0]);
+	glDrawElements(GL_TRIANGLES, arrowNumIndices, GL_UNSIGNED_SHORT, (void*)arrowIndexDataByteOffset);
+
 }
 
 

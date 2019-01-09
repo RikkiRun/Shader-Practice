@@ -249,15 +249,22 @@ ShapeDate ShapeGenerator::makeCube()
 	ret.numVertices = NUM_ARRAY_ELEMENTS(stackVerts);
 	ret.vertices = new Vertex[ret.numVertices];
 	memcpy(ret.vertices, stackVerts, sizeof(stackVerts));
-
 	unsigned short stackIndices[] = {
-		0,   1,  2,  0,  2,  3, // Top
-		4,   5,  6,  4,  6,  7, // Front
-		8,   9, 10,  8, 10, 11, // Right
-		12, 13, 14, 12, 14, 15, // Left
-		16, 17, 18, 16, 18, 19, // Back
-		20, 22, 21, 20, 23, 22, // Bottom
+	2,   1,  0,  3,  2,  0, // Top
+	6,   5,  4,  7,  6,  4, // Front
+	10,   9, 8,  11, 10, 8, // Right
+	14, 13, 12, 15, 14, 12, // Left
+	18, 17, 16, 19, 18, 16, // Back
+	21, 22, 20, 22, 23, 20, // Bottom
 	};
+//	unsigned short stackIndices[] = {
+//		0,   1,  2,  0,  2,  3, // Top
+//		4,   5,  6,  4,  6,  7, // Front
+//		8,   9, 10,  8, 10, 11, // Right
+//		12, 13, 14, 12, 14, 15, // Left
+//		16, 17, 18, 16, 18, 19, // Back
+//		20, 22, 21, 20, 23, 22, // Bottom
+//	};
 	ret.numIndices = NUM_ARRAY_ELEMENTS(stackIndices);
 	ret.indices = new GLushort[ret.numIndices];
 	memcpy(ret.indices, stackIndices, sizeof(stackIndices));
