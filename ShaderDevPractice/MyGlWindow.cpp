@@ -74,7 +74,7 @@ const char* MyGlWindow::TexFile[] = {
 void MyGlWindow::sendDataToOpenGL()
 {
 	ShapeDate teapot = ShapeGenerator::makeTeapot();
-	ShapeDate arrow = ShapeGenerator::makeCube();
+	ShapeDate arrow = ShapeGenerator::flipMakeCube();
 	ShapeDate plane = ShapeGenerator::makePlane(20);
 	ShapeDate planeNormals = ShapeGenerator::generateNormals(plane);
 	ShapeDate arrowNormals = ShapeGenerator::generateNormals(arrow);
@@ -577,7 +577,7 @@ void MyGlWindow::paintGL()
 
 	mat4 modelToProjectionMatrix;
 	mat4 viewToProjectionMatrix =
-		glm::perspective(60.0f, ((float)width()) / height(), 0.1f, 100.0f);
+		glm::perspective(60.0f, ((float)width()) / height(), 0.1f, 150.0f);
 	mat4 worldToViewMatrix = camera.getWorldToViewMatrix();
 	mat4 worldToProjectionMatrix = viewToProjectionMatrix * worldToViewMatrix;
 
@@ -603,10 +603,10 @@ void MyGlWindow::paintGL()
 	// teapots
 	glBindVertexArray(teapotVertexArrayObjectID);
 	mat4 teapot1modelToWorldMatrix =
-		glm::translate(vec3(-3.0f, 0.0f, -6.0f)) * glm::rotate(0.0f, vec3(1.0f, 0.0f, 0.0f));
+		glm::translate(vec3(0.0f, 0.0f, 3.0f)) * glm::scale(vec3(3.0f, 3.0f, 3.0f));
 	modelToProjectionMatrix = worldToProjectionMatrix * teapot1modelToWorldMatrix;
 	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
-	//	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
+//	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
 
 	mat4 teapot2ModelToWorldMatrix =
 		glm::translate(vec3(3.0f, 0.0f, -6.75f)) * glm::rotate(0.0f, vec3(1.0f, 0.0f, 0.0f));

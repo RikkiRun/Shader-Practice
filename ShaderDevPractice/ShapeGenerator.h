@@ -33,6 +33,7 @@ public:
 	static ShapeDate makeTriangle();
 	static ShapeDate makeCube();
 	static ShapeDate makeArrow();
+	static ShapeDate flipMakeCube();
 	static ShapeDate makePlane(uint dimensions = 10);
 	static ShapeDate makeTeapot(uint tesslation = 10, const glm::mat4& lidTransform = glm::mat4());
 	static ShapeDate generateNormals(const ShapeDate& data);

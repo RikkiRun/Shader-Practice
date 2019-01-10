@@ -28,7 +28,7 @@ void main()
 	//diffuse
 	vec3 lightVectorWorld = normalize(lightPositionWorld - vertexPositionWorld);
 	float brightness = dot(lightVectorWorld, normalize(normalTextureInfoInWorld));
-	vec4 diffuseLight = vec4(0, brightness, 0, 1.0);
+	vec4 diffuseLight = vec4(brightness, brightness, brightness, 1.0);
 	
 	//specular
 	vec3 reflectedLightVectorWorld = reflect(-lightVectorWorld, normalTextureInfoInWorld);
