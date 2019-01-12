@@ -17,6 +17,7 @@ public:
 	void doNothinbg();
 	void loatTexture();
 	void loadCubemap();
+	void doReflect();
 	static const char* TexFile[];
 
 protected:

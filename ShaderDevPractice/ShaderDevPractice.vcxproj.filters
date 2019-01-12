@@ -28,6 +28,8 @@
     <None Include="ClassDiagram.cd" />
     <None Include="cubemapVertexShader.glsl" />
     <None Include="cubemapFragmentShader.glsl" />
+    <None Include="reflectVertexShader.glsl" />
+    <None Include="reflectFragmentShader.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Primitives">

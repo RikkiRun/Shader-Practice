@@ -40,6 +40,8 @@
     <None Include="cubemapFragmentShader.glsl" />
     <None Include="cubemapVertexShader.glsl" />
     <None Include="FragmentShaderCode.glsl" />
+    <None Include="reflectFragmentShader.glsl" />
+    <None Include="reflectVertexShader.glsl" />
     <None Include="UniformShaderCode.glsl" />
     <None Include="VertexShaderCode.glsl" />
   </ItemGroup>

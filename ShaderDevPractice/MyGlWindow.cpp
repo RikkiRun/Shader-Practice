@@ -30,6 +30,7 @@ glm::vec3 lightPositionWorld = vec3(0.0f, 0.5f, 0.0f);
 
 GLuint programID;
 GLuint cubemapProgramID;
+GLuint reflectProgramID;
 
 GLuint teapotNumIndices;
 GLuint arrowNumIndices;
@@ -38,6 +39,7 @@ GLuint planeNumIndices;
 GLuint theBufferID;
 GLuint frameBufferID;
 GLuint cubemapBufferID;
+GLuint reflectBufferID;
 
 GLuint teapotVertexArrayObjectID;
 GLuint arrowVertexArrayObjectID;
@@ -74,7 +76,7 @@ const char* MyGlWindow::TexFile[] = {
 void MyGlWindow::sendDataToOpenGL()
 {
 	ShapeDate teapot = ShapeGenerator::makeTeapot();
-	ShapeDate arrow = ShapeGenerator::makeCube();
+	ShapeDate arrow = ShapeGenerator::flipMakeCube();
 	ShapeDate plane = ShapeGenerator::makePlane(20);
 	ShapeDate planeNormals = ShapeGenerator::generateNormals(plane);
 	ShapeDate arrowNormals = ShapeGenerator::generateNormals(arrow);
@@ -379,6 +381,27 @@ void MyGlWindow::installShaders()
 	{
 		return;
 	}
+
+	temp = readShaderCode("reflectVertexShader.glsl");
+	adapter[0] = temp.c_str();
+	glShaderSource(vertexShaderID, 1, adapter, 0);
+	temp = readShaderCode("reflectFragmentShader.glsl");
+	adapter[0] = temp.c_str();
+	glShaderSource(fragmentShaderID, 1, adapter, 0);
+	glCompileShader(vertexShaderID);
+	glCompileShader(fragmentShaderID);
+	reflectProgramID = glCreateProgram();
+	if (!checkShaderStatus(vertexShaderID) || !checkShaderStatus(fragmentShaderID))
+	{
+		return;
+	}
+	glAttachShader(reflectProgramID, vertexShaderID);
+	glAttachShader(reflectProgramID, fragmentShaderID);
+	glLinkProgram(reflectProgramID);
+	if (!checkProgramStatus(reflectProgramID))
+	{
+		return;
+	}
 	glDeleteShader(vertexShaderID);
 	glDeleteShader(fragmentShaderID);
 }
@@ -398,6 +421,7 @@ void MyGlWindow::initializeGL()
 	installShaders();
 	loatTexture();
 	loadCubemap();
+	doReflect();
 	fullTransformationUniformLocation = glGetUniformLocation(programID, "modelToProjectionMatrix");
 }
 
@@ -446,7 +470,6 @@ void MyGlWindow::loatTexture()
 	}
 	else {
 		fprintf(stderr, "tex1 not found");
-		
 	}
 
 }
@@ -518,6 +541,13 @@ void MyGlWindow::loadCubemap()
 
 }
 
+void MyGlWindow::doReflect()
+{
+	glGenBuffers(1, &reflectBufferID);
+	glBindBuffer(GL_ARRAY_BUFFER, reflectBufferID);
+
+}
+
 
 void MyGlWindow::keyPressEvent(QKeyEvent* e)
 {
@@ -573,11 +603,9 @@ void MyGlWindow::paintGL()
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, width(), height());
 
-
-
 	mat4 modelToProjectionMatrix;
 	mat4 viewToProjectionMatrix =
-		glm::perspective(60.0f, ((float)width()) / height(), 0.1f, 100.0f);
+		glm::perspective(60.0f, ((float)width()) / height(), 0.1f, 150.0f);
 	mat4 worldToViewMatrix = camera.getWorldToViewMatrix();
 	mat4 worldToProjectionMatrix = viewToProjectionMatrix * worldToViewMatrix;
 
@@ -603,10 +631,10 @@ void MyGlWindow::paintGL()
 	// teapots
 	glBindVertexArray(teapotVertexArrayObjectID);
 	mat4 teapot1modelToWorldMatrix =
-		glm::translate(vec3(-3.0f, 0.0f, -6.0f)) * glm::rotate(0.0f, vec3(1.0f, 0.0f, 0.0f));
+		glm::translate(vec3(0.0f, 0.0f, 3.0f)) * glm::scale(vec3(3.0f, 3.0f, 3.0f));
 	modelToProjectionMatrix = worldToProjectionMatrix * teapot1modelToWorldMatrix;
 	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
-	//	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
+//	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
 
 	mat4 teapot2ModelToWorldMatrix =
 		glm::translate(vec3(3.0f, 0.0f, -6.75f)) * glm::rotate(0.0f, vec3(1.0f, 0.0f, 0.0f));
@@ -640,8 +668,6 @@ void MyGlWindow::paintGL()
 
 	//cubemap
 	glUseProgram(cubemapProgramID);
-
-	
 	//set the tex1 sample uniform to refer to texture unit 0
 	int loc = glGetUniformLocation(cubemapProgramID, "skybox");
 	if (loc >= 0) {
@@ -655,19 +681,43 @@ void MyGlWindow::paintGL()
 	}
 	GLint drawSkyboxUniformLocation = glGetUniformLocation(cubemapProgramID, "drawSkyBox");
 	std::cout << "drawskybox: " << drawSkyboxUniformLocation << std::endl;
-//	glUniform1i(drawSkyboxUniformLocation, 1.0);
+	glUniform1f(drawSkyboxUniformLocation, 1.0);
 	GLint cubemapMVP = glGetUniformLocation(cubemapProgramID, "MVP");
 	std::cout << "mmvvpp: " << cubemapMVP << std::endl;
-
 	glBindVertexArray(arrowVertexArrayObjectID);
 	mat4 arrowModelToWorldMatrix = glm::scale(50.0f, 50.0f, 50.0f);
 	modelToProjectionMatrix = worldToProjectionMatrix * arrowModelToWorldMatrix;
 	glUniformMatrix4fv(cubemapMVP, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
-	
-//	glUniformMatrix4fv(modelToWorldTransformMatrixUniformLocation, 1, GL_FALSE,
-//		&arrowModelToWorldMatrix[0][0]);
 	glDrawElements(GL_TRIANGLES, arrowNumIndices, GL_UNSIGNED_SHORT, (void*)arrowIndexDataByteOffset);
 
+	glUniform1f(drawSkyboxUniformLocation, 2.0f);
+	std::cout << "drawskybox2: " << drawSkyboxUniformLocation << std::endl;
+	GLint reflectFactor = glGetUniformLocation(cubemapProgramID, "reflectFactor");
+	glUniform1f(reflectFactor, 0.5);
+	GLint cubemapModelMatrix = glGetUniformLocation(cubemapProgramID, "modelMatrix");
+	GLint cubemapCameraPosition = glGetUniformLocation(cubemapProgramID, "worldCameraPosition");
+//	vec3 postiontttt = camera.getPostion;
+//	glUniform3fv(cubemapCameraPosition, postiontttt.x, postiontttt.y, postiontttt.z);
+	glBindVertexArray(teapotVertexArrayObjectID);
+	mat4 teapot1modelToWorldMatrix2 =
+		glm::translate(vec3(0.0f, 0.0f, 3.0f)) * glm::scale(vec3(3.0f, 3.0f, 3.0f));
+	modelToProjectionMatrix = worldToProjectionMatrix * teapot1modelToWorldMatrix2;
+	glUniformMatrix4fv(cubemapMVP, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
+	glUniformMatrix4fv(cubemapModelMatrix, 1, GL_FALSE,	&teapot1modelToWorldMatrix2[0][0]);
+	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
+
+
+	//reflection
+//	glUseProgram(reflectProgramID);
+//	int loc_reflect = glGetUniformLocation(reflectProgramID, "skybox");
+//	if (loc >= 0) {
+//		glActiveTexture(GL_TEXTURE2);
+//	}
+//	else {
+//		fprintf(stderr, "skybox not found!!!");
+//	}
+//	GLint reflectUniformLocation = glGetUniformLocation(reflectProgramID, "reflectFactor");
+//
 }
 
 
