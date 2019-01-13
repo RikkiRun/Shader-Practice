@@ -1,11 +1,14 @@
 #version 430
 
 in layout(location = 0) vec3 vertexPosition;
-in layout(location = 1) vec3 vertexNormal;
-in layout(location = 2) vec2 vertexTexCoord;
+in layout(location = 1) vec3 vertexColor;
+in layout(location = 2) vec3 vertexNormal;
+in layout(location = 3) vec2 UV;
+in layout(location = 4) vec3 tangent;
 
 
-out vec3 reflectDir1;
+out vec3 reflectVectorWorld; // reflection direction
+out vec3 refractVectorWorld; // transmitted direction
 
 //uniform bool drawSkyBox;
 
@@ -21,7 +24,10 @@ void main(){
 	vec3 worldPos = vec3(modelMatix * vec4(vertexPosition, 1.0));
 	vec3 worldNorm = vec3(modelMatix * vec4(vertexNormal, 0.0));
 	vec3 worldView = normalize(worldCameraPostion - worldPos);
-	reflectDir1 = reflect(-worldView, worldNorm);
+	reflectVectorWorld = reflect(-worldView, worldNorm);
+
+	float refractionRatio = float(1.00/1.33);
+	refractVectorWorld = refract(-worldView, (-worldNorm), refractionRatio);
 
 	gl_Position = MVP * vec4(vertexPosition, 1.0);
 }

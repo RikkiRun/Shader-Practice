@@ -327,6 +327,8 @@ string  MyGlWindow::readShaderCode(const char* fileName)
 
 void MyGlWindow::installShaders()
 {
+
+	//------------bind first shader ----------
 	programID = glCreateProgram();
 
 	GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -356,11 +358,11 @@ void MyGlWindow::installShaders()
 	{
 		return;
 	}
-//	glDeleteShader(vertexShaderID);
-//	glDeleteShader(fragmentShaderID);
+	glDeleteShader(vertexShaderID);
+	glDeleteShader(fragmentShaderID);
 
 
-
+	// -----------bind cube map shader ---------
 	temp = readShaderCode("cubemapVertexShader.glsl");
 	adapter[0] = temp.c_str();
 	glShaderSource(vertexShaderID, 1, adapter, 0);
@@ -598,6 +600,7 @@ void MyGlWindow::keyPressEvent(QKeyEvent* e)
 void MyGlWindow::paintGL()
 {
 
+	//------------------------------------------simple model -------------------------------------------------------------------------
 	glUseProgram(programID);
 	//but clearing buffer is expensive, so need to be cleared once
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -621,7 +624,6 @@ void MyGlWindow::paintGL()
 
 	//add light position
 	GLint lightPositionWorldUniformPosition = glGetUniformLocation(programID, "lightPositionWorld");
-
 	glUniform3fv(lightPositionWorldUniformPosition, 1, &lightPositionWorld[0]);
 
 	// model transform matrix 
@@ -656,16 +658,15 @@ void MyGlWindow::paintGL()
 	glBindVertexArray(teapotNormalVertexArrayObjectID);
 //	glDrawElements(GL_LINE, teapotNormalIndices, GL_UNSIGNED_SHORT, (void*)teapotNormalIndexDataByteOffset);
 
-	//	printf(" %f/n", teapotNormalIndices);
-
 		// arrow normals
 	//	glDrawElements(GL_LINE, arrowNormalIndices, GL_UNSIGNED_SHORT, (void*)arrowNormalVertexArrayByteOffset);
 
 		// plane normals
 	//	glDrawElements(GL_LINE, planeNormalIndices, GL_UNSIGNED_SHORT, (void*)planeNormalVertexArrayByteOffset);
 
-//	cout << modelToWorldTransformMatrixUniformLocation;
 
+	//------------------------------------------------------skybox--------------------------------------------------------------
+	//reflection has problem, where is material color?
 	//cubemap
 	glUseProgram(cubemapProgramID);
 	//set the tex1 sample uniform to refer to texture unit 0
@@ -682,6 +683,7 @@ void MyGlWindow::paintGL()
 	GLint drawSkyboxUniformLocation = glGetUniformLocation(cubemapProgramID, "drawSkyBox");
 	std::cout << "drawskybox: " << drawSkyboxUniformLocation << std::endl;
 	glUniform1f(drawSkyboxUniformLocation, 1.0);
+
 	GLint cubemapMVP = glGetUniformLocation(cubemapProgramID, "MVP");
 	std::cout << "mmvvpp: " << cubemapMVP << std::endl;
 	glBindVertexArray(arrowVertexArrayObjectID);
@@ -691,22 +693,26 @@ void MyGlWindow::paintGL()
 	glDrawElements(GL_TRIANGLES, arrowNumIndices, GL_UNSIGNED_SHORT, (void*)arrowIndexDataByteOffset);
 
 	glUniform1f(drawSkyboxUniformLocation, 2.0f);
-	std::cout << "drawskybox2: " << drawSkyboxUniformLocation << std::endl;
+//	std::cout << "drawskybox2: " << drawSkyboxUniformLocation << std::endl;
 	GLint reflectFactor = glGetUniformLocation(cubemapProgramID, "reflectFactor");
 	glUniform1f(reflectFactor, 0.5);
 	GLint cubemapModelMatrix = glGetUniformLocation(cubemapProgramID, "modelMatrix");
 	GLint cubemapCameraPosition = glGetUniformLocation(cubemapProgramID, "worldCameraPosition");
-//	vec3 postiontttt = camera.getPostion;
-//	glUniform3fv(cubemapCameraPosition, postiontttt.x, postiontttt.y, postiontttt.z);
+	vec3 cameraPosition = camera.getPostion();
+	float cameraX = cameraPosition.x;
+	float cameraY = cameraPosition.y;
+	float cameraZ = cameraPosition.z;
+//	std::cout << "x position: " << cameraX << std::endl;
+	glUniform3f(cubemapCameraPosition, cameraX, cameraY, cameraZ);
 	glBindVertexArray(teapotVertexArrayObjectID);
 	mat4 teapot1modelToWorldMatrix2 =
-		glm::translate(vec3(0.0f, 0.0f, 3.0f)) * glm::scale(vec3(3.0f, 3.0f, 3.0f));
+		glm::translate(vec3(0.0f, 0.0f, 0.0f)) * glm::scale(vec3(3.0f, 3.0f, 3.0f)) * glm::rotate(-90.0f, vec3(1.0f, 0.0f, 0.0f));
 	modelToProjectionMatrix = worldToProjectionMatrix * teapot1modelToWorldMatrix2;
 	glUniformMatrix4fv(cubemapMVP, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 	glUniformMatrix4fv(cubemapModelMatrix, 1, GL_FALSE,	&teapot1modelToWorldMatrix2[0][0]);
 	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
 
-
+	// -------------------------------------------------reflection -------------------------------------------------------
 	//reflection
 //	glUseProgram(reflectProgramID);
 //	int loc_reflect = glGetUniformLocation(reflectProgramID, "skybox");
@@ -717,7 +723,6 @@ void MyGlWindow::paintGL()
 //		fprintf(stderr, "skybox not found!!!");
 //	}
 //	GLint reflectUniformLocation = glGetUniformLocation(reflectProgramID, "reflectFactor");
-//
 }
 
 

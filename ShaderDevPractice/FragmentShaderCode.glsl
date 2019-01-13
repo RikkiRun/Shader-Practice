@@ -18,6 +18,7 @@ uniform sampler2D Tex1;
 
 void main()
 {
+//--------------------- normal map 
 	vec2 flippedUV = vec2(TexCoord.x,-TexCoord.y);
 	vec4 normalTextureInfo = normalize(texture(Tex1, flippedUV)*2 - 1);
 	vec4 testNormalTengent = vec4(0.0, 0.0, 1.0, 0.0);
