@@ -13,5 +13,4 @@ int main(int argc, char* argv[]) {
 	myWindow.show();
 	myWindow.startTimer(20);
 	return app.exec();
-
 }

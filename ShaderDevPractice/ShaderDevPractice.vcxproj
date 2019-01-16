@@ -46,6 +46,12 @@
     <None Include="VertexShaderCode.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="texture\a_bk.png" />
+    <Image Include="texture\a_dn.png" />
+    <Image Include="texture\a_ft.png" />
+    <Image Include="texture\a_lf.png" />
+    <Image Include="texture\a_rt.png" />
+    <Image Include="texture\a_up.png" />
     <Image Include="texture\back.png" />
     <Image Include="texture\down.png" />
     <Image Include="texture\flower.jpg" />
@@ -54,6 +60,12 @@
     <Image Include="texture\left.png" />
     <Image Include="texture\normalMap.png" />
     <Image Include="texture\right.png" />
+    <Image Include="texture\ss_bk.png" />
+    <Image Include="texture\ss_dn.png" />
+    <Image Include="texture\ss_ft.png" />
+    <Image Include="texture\ss_lf.png" />
+    <Image Include="texture\ss_rt.png" />
+    <Image Include="texture\ss_up.png" />
     <Image Include="texture\up.png" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

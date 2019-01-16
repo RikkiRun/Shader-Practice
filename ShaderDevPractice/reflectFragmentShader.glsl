@@ -1,20 +1,26 @@
 #version 430
 
-in vec3 reflectVectorWorld;
-in vec3 refractVectorWorld;
+out vec4 FragColor;
+
+in vec3 pass_normal;
+in vec3 vertexPositionWorld;
+in vec3 test;
 
 uniform samplerCube skybox;
+uniform sampler2D Tex1;
+
+uniform vec3 lightPositionWorld;
+uniform vec3 worldCameraPosition;
+//uniform vec3 ambientLight;
+
+
+//uniform vec4 materialColor; // color of the object's "Tint"
 uniform float reflectFactor; // amount of reflection
+uniform mat4 modelMatrix;
 
-//uniform vec4 matrialColor;
-
-
-out vec4 fragColor;
 
 void main(){
-	vec4 matrialColor = vec4(0.5, 0.5, 0.5, 1.0);
-	// access the cupmap texture
-//	vec4 cubeMapColor = texture(skybox, reflectFactor);
-	//fragColor = mix(matrialColor, cubeMapColor, reflectFactor);
-	
+	vec3 I = normalize(vertexPositionWorld - worldCameraPosition);
+	vec3 reflection = reflect(I, normalize(pass_normal));
+	FragColor = vec4(texture(skybox, reflection).rgb, 1.0);
 }

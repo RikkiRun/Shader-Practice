@@ -40,9 +40,9 @@ void main()
 
 	// lookup normal from normal map
 
-	//vec4 texColor = texture(Tex1, TexCoord);
+//	vec4 texColor = texture(Tex1, TexCoord);
 
-	//daColor = texColor;
+//	daColor = texColor;
 	daColor = vec4(ambientLight,1.0)+ clamp(specularLight,0,1) + clamp(diffuseLight,0,1);
 //	daColor = vec4(normalTextureInfoInWorld.xyz,0.0);
 }

@@ -85,7 +85,7 @@ ShapeDate ShapeGenerator::makeTriangle()
 		vec4(+0.0f, +1.0f, +0.0f, +0.0f),	// color
 		vec3(+0.0f, +0.0f, +1.0f),			// normal
 		vec2(+0.0f, +1.0f),					// UV
-		vec3(+1.0f, +0.0f, 0.0f),			// tangent
+		vec3(+1.0f, +0.0f, 0.0f),			// tangenta
 
 		vec3(+1.0f, -1.0f, +0.0f),			// position
 		vec4(+0.0f, +0.0f, +1.0f, +0.0f),	// color
@@ -258,6 +258,7 @@ ShapeDate ShapeGenerator::makeCube()
 		16, 17, 18, 16, 18, 19, // Back
 		20, 22, 21, 20, 23, 22, // Bottom
 	};
+
 	ret.numIndices = NUM_ARRAY_ELEMENTS(stackIndices);
 	ret.indices = new GLushort[ret.numIndices];
 	memcpy(ret.indices, stackIndices, sizeof(stackIndices));
