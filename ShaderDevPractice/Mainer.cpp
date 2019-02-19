@@ -12,6 +12,7 @@ int main(int argc, char* argv[]) {
 //	myWidget.show();
 	myWindow.show();
 	myWindow.startTimer(20);
+	myWindow.setFixedSize(800, 800);
 	return app.exec();
 
 }

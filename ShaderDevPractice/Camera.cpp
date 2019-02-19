@@ -4,8 +4,8 @@
 
 
 Camera::Camera() :
-	viewDirection(-0.06f, -0.63f, -0.77f),
-	position(0.20f, 3.63f, 4.53f),
+	viewDirection(-0.06f, -0.43f, -0.77f),
+	position(0.50f, 3.63f, 4.53f),
 	UP(0.0f, 1.0f, 0.0f)
 {
 }

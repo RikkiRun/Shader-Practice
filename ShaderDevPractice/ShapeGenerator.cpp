@@ -36,6 +36,9 @@ ShapeDate ShapeGenerator::makePlaneVerts(uint dimensions)
 			thisVert.position.x = j - half;
 			thisVert.position.z = i - half;
 			thisVert.position.y = 0;
+			thisVert.tangent = glm::vec3(1, 0, 0);
+			thisVert.UV.x = j / (float)dimensions;
+			thisVert.UV.y = i / (float)dimensions;
 			thisVert.normal = glm::vec3(0, 1, 0);
 			thisVert.color = randomColor();
 		}
@@ -550,6 +553,8 @@ ShapeDate ShapeGenerator::makeTeapot(uint tesselation, const glm::mat4& lidTrans
 		v.normal.x = normals[i * 3 + 0];
 		v.normal.y = normals[i * 3 + 1];
 		v.normal.z = normals[i * 3 + 2];
+		v.UV.y = textureCoordinates[i * 2 + 0];
+		v.UV.x = textureCoordinates[i * 2 + 1];
 
 	}
 	return ret;

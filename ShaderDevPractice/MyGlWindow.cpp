@@ -59,6 +59,9 @@ GLuint fullTransformationUniformLocation;
 
 Camera camera;
 
+GLuint fboHandle; // the handle to the FB0
+GLuint renderTex; // create texture object
+
 //load texture file 
 const char * theTexture = "flower.jpg";
 
@@ -216,7 +219,6 @@ void MyGlWindow::sendDataToOpenGL()
 	planeIndexDataByteOffset = planByteOffset + plane.vertexBufferSize();
 	teapotNormalIndexDataByteOffset = teapotNormalsByteOffset + teapotNormals.vertexBufferSize();
 
-
 	teapot.cleanup();
 	arrow.cleanup();
 	plane.cleanup();
@@ -370,6 +372,7 @@ void MyGlWindow::initializeGL()
 	sendDataToOpenGL();
 	installShaders();
 	loatTexture();
+	render2texture();
 	fullTransformationUniformLocation = glGetUniformLocation(programID, "modelToProjectionMatrix");
 }
 
@@ -397,7 +400,7 @@ void MyGlWindow::doNothinbg()
 void MyGlWindow::loatTexture()
 {
 	//load texture file
-	const char* texName = "texture/flower.png";
+	const char* texName = "brick.png";
 	QImage timg = QGLWidget::convertToGLFormat(QImage(texName, "PNG"));
 
 	//cope file to openGl
@@ -408,13 +411,77 @@ void MyGlWindow::loatTexture()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, timg.width(), timg.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, timg.bits());
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
+	glGenerateMipmap(GL_TEXTURE_2D);
 	//set the tex1 sample uniform to refer to texture unit 0
-	int loc = glGetUniformLocation(programID, "Tex1");
-	if (loc >= 0)
-		glUniform1i(loc, 0);
-	else
-		fprintf(stderr, "tex1 not found");
+//	int loc = glGetUniformLocation(programID, "Tex1");
+//	if (loc >= 0)
+//		glUniform1i(loc, 0);
+//	else
+//		fprintf(stderr, "tex1 not found");
+
+	const char* specularTexName = "texture/brick-specular.png";
+	timg = QGLWidget::convertToGLFormat(QImage(specularTexName, "PNG"));
+	glActiveTexture(GL_TEXTURE1);
+	GLuint specularTid;
+	glGenTextures(1, &specularTid);
+	glBindTexture(GL_TEXTURE_2D, specularTid);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, timg.width(), timg.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, timg.bits());
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	//set the tex1 sample uniform to refer to texture unit 0
+//	loc = glGetUniformLocation(programID, "specularTex");
+//	if (loc >= 1)
+//		glUniform1i(loc, 1);
+//	else
+//		fprintf(stderr, "specularTex not found");
+
+	
+
+	// one pixel with white texture
+	GLuint whiteTexHandle;
+	GLubyte whiteTex[] = { 255, 255, 255, 255 };
+	glActiveTexture(GL_TEXTURE3);
+	glGenTextures(1, &whiteTexHandle);
+	glBindTexture(GL_TEXTURE_2D, whiteTexHandle);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whiteTex);
+
+
+	
+
+}
+
+void MyGlWindow::render2texture()
+{
+	// generate and bind frame buffer
+	glGenFramebuffers(1, &fboHandle);
+	glBindFramebuffer(GL_FRAMEBUFFER, fboHandle);
+
+	// create render texture object
+	glGenTextures(1, &renderTex);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, renderTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//bind texture to the FBO
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTex, 0);
+
+	//create depth buffer
+	GLuint depthBuf;
+	glGenRenderbuffers(1, &depthBuf);
+	glBindRenderbuffer(GL_RENDERBUFFER, depthBuf);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 512, 512);
+
+	//bind the depth buffer to the fbo
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuf);
+	//set the target for the fragment shader outputs
+	GLenum drawBufs[] = { GL_COLOR_ATTACHMENT0 };
+	glDrawBuffers(1, drawBufs);
+
+	//unbind the framebuffer, and revert to default framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 
 }
 
@@ -446,11 +513,30 @@ void MyGlWindow::keyPressEvent(QKeyEvent* e)
 
 
 void MyGlWindow::paintGL()
-{
+{	
+	//bind to texture's FBO
+//	glBindFramebuffer(GL_FRAMEBUFFER, fboHandle);
+//	glViewport(0, 0, 512, 512); //viewport for texture
+//	//use the white texture here
+//	int loc = glGetUniformLocation(programID, "Tex1");
+//	if (loc >= 0)
+//		glUniform1i(loc, 3);
+//	else
+//		fprintf(stderr, "fbo texture not found");
+//
+//	cout<< loc;
+	
+
 	//but clearing buffer is expensive, so need to be cleared once
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, width(), height());
 	
+	int loc = glGetUniformLocation(programID, "Tex1");
+	if (loc >= 0)
+		glUniform1i(loc, 0);
+	else
+		fprintf(stderr, "tex1 not found");
+
 
 	mat4 modelToProjectionMatrix;
 	mat4 viewToProjectionMatrix =
@@ -458,9 +544,10 @@ void MyGlWindow::paintGL()
 	mat4 worldToViewMatrix = camera.getWorldToViewMatrix();
 	mat4 worldToProjectionMatrix = viewToProjectionMatrix * worldToViewMatrix;
 
+
 	//add ambient light
 	GLint ambientLightUniformLocation = glGetUniformLocation(programID, "ambientLight");
-	vec4 ambientLight(0.25f, 0.25f, 0.25f, 1.0f);
+	vec4 ambientLight(1.0f, 1.0f, 1.0f, 1.0f);
 	glUniform4fv(ambientLightUniformLocation, 1, &ambientLight[0]);
 
 	// add specular light
@@ -482,16 +569,37 @@ void MyGlWindow::paintGL()
 	// teapots
 	glBindVertexArray(teapotVertexArrayObjectID);
 	mat4 teapot1modelToWorldMatrix =
-		glm::translate(vec3(-3.0f, 0.0f, -6.0f)) * glm::rotate(0.0f, vec3(1.0f, 0.0f, 0.0f));
+		glm::translate(vec3(0.0f, 0.0f, -1.0f)) * glm::rotate(90.0f, vec3(-1.0f, 0.0f, 0.0f));
 	modelToProjectionMatrix = worldToProjectionMatrix * teapot1modelToWorldMatrix;
 	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
-//	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
+	glUniformMatrix4fv(modelToWorldTransformMatrixUniformLocation, 1, GL_FALSE,
+		&teapot1modelToWorldMatrix[0][0]);
+	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
 
 	mat4 teapot2ModelToWorldMatrix =
 		glm::translate(vec3(3.0f, 0.0f, -6.75f)) * glm::rotate(0.0f, vec3(1.0f, 0.0f, 0.0f));
 	modelToProjectionMatrix = worldToProjectionMatrix * teapot2ModelToWorldMatrix;
 	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 //	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
+
+
+	render2texture();
+	//	glBindFramebuffer(GL_FRAMEBUFFER, fboHandle);
+	//glViewport(0, 0, 512, 512); //viewport for texture
+	//use the white texture here
+	loc = glGetUniformLocation(programID, "Tex1");
+	if (loc >= 0)
+		glUniform1i(loc, 3);
+	else
+		fprintf(stderr, "fbo texture not found");
+	//unbind texture's fbo (back to default FB)
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, width(), height());
+	//use the texture that is associate with the FBO
+	loc = glGetUniformLocation(programID, "Tex1");
+	glUniform1i(loc, 2);
+
+
 
 	// arrow 
 	glBindVertexArray(arrowVertexArrayObjectID);
@@ -501,7 +609,7 @@ void MyGlWindow::paintGL()
 	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 	glUniformMatrix4fv(modelToWorldTransformMatrixUniformLocation, 1, GL_FALSE,
 		&arrowModelToWorldMatrix[0][0]);
-	glDrawElements(GL_TRIANGLES, arrowNumIndices, GL_UNSIGNED_SHORT, (void*)arrowIndexDataByteOffset);
+	//	glDrawElements(GL_TRIANGLES, arrowNumIndices, GL_UNSIGNED_SHORT, (void*)arrowIndexDataByteOffset);
 
 	//plane
 	glBindVertexArray(planeVertexArrayObjectID);
@@ -514,7 +622,7 @@ void MyGlWindow::paintGL()
 
 	// teapot normals
 	glBindVertexArray(teapotNormalVertexArrayObjectID);
-	glDrawElements(GL_LINE, teapotNormalIndices, GL_UNSIGNED_SHORT, (void*)teapotNormalIndexDataByteOffset);
+	//glDrawElements(GL_LINE, teapotNormalIndices, GL_UNSIGNED_SHORT, (void*)teapotNormalIndexDataByteOffset);
 	
 //	printf(" %f/n", teapotNormalIndices);
 	 

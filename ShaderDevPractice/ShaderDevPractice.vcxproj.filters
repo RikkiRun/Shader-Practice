@@ -35,5 +35,7 @@
   <ItemGroup>
     <Image Include="texture\flower.jpg" />
     <Image Include="texture\flower.png" />
+    <Image Include="brick.png" />
+    <Image Include="texture\brick-specular.png" />
   </ItemGroup>
 </Project>
