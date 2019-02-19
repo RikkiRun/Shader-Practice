@@ -31,6 +31,9 @@ void main()
 
 
 //	daColor = clamp(specularLight, 0, 1) * texColor;
+daColor = texColor;
 //	daColor = ambientLight;
-	daColor = texColor* (ambientLight + clamp(diffuseLight, 0, 1)) + clamp(specularLight, 0, 1);
+
+
+//	daColor = texColor* (ambientLight + clamp(diffuseLight, 0, 1)) + clamp(specularLight, 0, 1);
 }

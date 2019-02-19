@@ -38,6 +38,8 @@
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
     <None Include="FragmentShaderCode.glsl" />
+    <None Include="frameFragmentShaderCode.glsl" />
+    <None Include="frameVertexShaderCode.glsl" />
     <None Include="UniformShaderCode.glsl" />
     <None Include="VertexShaderCode.glsl" />
   </ItemGroup>
@@ -46,6 +48,7 @@
     <Image Include="texture\brick-specular.png" />
     <Image Include="texture\flower.jpg" />
     <Image Include="texture\flower.png" />
+    <Image Include="texture\pink.png" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

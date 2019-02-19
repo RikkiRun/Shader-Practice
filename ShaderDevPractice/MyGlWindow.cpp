@@ -27,6 +27,8 @@ extern const char* vertexShaderCode;
 extern const char* fragmentShaderCode;
 
 GLuint programID;
+GLuint frameProgramID;
+
 GLuint teapotNumIndices;
 GLuint arrowNumIndices;
 GLuint planeNumIndices;
@@ -70,7 +72,7 @@ void MyGlWindow::sendDataToOpenGL()
 {
 	ShapeDate teapot = ShapeGenerator::makeTeapot();
 	ShapeDate arrow = ShapeGenerator::makeCube();
-	ShapeDate plane = ShapeGenerator::makePlane(20);
+	ShapeDate plane = ShapeGenerator::makePlane(10);
 	ShapeDate planeNormals = ShapeGenerator::generateNormals(plane);
 	ShapeDate arrowNormals = ShapeGenerator::generateNormals(arrow);
 	ShapeDate teapotNormals = ShapeGenerator::generateNormals(teapot);
@@ -232,7 +234,6 @@ bool checkStatus(GLint objectID,
 	PFNGLGETSHADERINFOLOGPROC getInfoLogFunc,
 	GLenum statusType)
 {
-
 	GLint status; // only 1 status
 	objectPropertyGetterFunc(objectID, statusType, &status);
 	if (status != GL_TRUE) {
@@ -313,6 +314,7 @@ string  MyGlWindow::readShaderCode(const char* fileName)
 
 void MyGlWindow::installShaders()
 {
+	//bind first shader
 	programID = glCreateProgram();
 
 	GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -337,9 +339,6 @@ void MyGlWindow::installShaders()
 	glAttachShader(programID, vertexShaderID);
 	glAttachShader(programID, fragmentShaderID);
 
-	//binding position before linking
-//	glBindAttribLocation(programID, 2, "position");
-
 	glLinkProgram(programID);
 
 	if (!checkProgramStatus(programID))
@@ -347,15 +346,34 @@ void MyGlWindow::installShaders()
 		return;
 	}
 
-	//	GLint posiitonLocation = glGetAttribLocation(programID, "position");
-	//	GLint colorLocation = glGetAttribLocation(programID, "vertexColor");
-	//	GLint transformLocation = glGetAttribLocation(programID, "modelToProjectionMatrix");
-
-
 	glDeleteShader(vertexShaderID);
 	glDeleteShader(fragmentShaderID);
 
-	glUseProgram(programID);
+
+
+	//-- bind frame shader
+	temp = readShaderCode("frameVertexShaderCode.glsl");
+	adapter[0] = temp.c_str();
+	glShaderSource(vertexShaderID, 1, adapter, 0);
+	temp = readShaderCode("frameFragmentShaderCode.glsl");
+	adapter[0] = temp.c_str();
+	glShaderSource(fragmentShaderID, 1, adapter, 0);
+	glCompileShader(vertexShaderID);
+	glCompileShader(fragmentShaderID);
+	frameProgramID = glCreateProgram();
+	if (!checkShaderStatus(vertexShaderID) || !checkShaderStatus(fragmentShaderID))
+	{
+		return;
+	}
+	glAttachShader(frameProgramID, vertexShaderID);
+	glAttachShader(frameProgramID, fragmentShaderID);
+	glLinkProgram(frameProgramID);
+	if (!checkProgramStatus(frameProgramID))
+	{
+		return;
+	}
+	glDeleteShader(vertexShaderID);
+	glDeleteShader(fragmentShaderID);
 }
 
 MyGlWindow::MyGlWindow()
@@ -373,7 +391,7 @@ void MyGlWindow::initializeGL()
 	installShaders();
 	loatTexture();
 	render2texture();
-	fullTransformationUniformLocation = glGetUniformLocation(programID, "modelToProjectionMatrix");
+	
 }
 
 
@@ -436,19 +454,6 @@ void MyGlWindow::loatTexture()
 //	else
 //		fprintf(stderr, "specularTex not found");
 
-	
-
-	// one pixel with white texture
-	GLuint whiteTexHandle;
-	GLubyte whiteTex[] = { 255, 255, 255, 255 };
-	glActiveTexture(GL_TEXTURE3);
-	glGenTextures(1, &whiteTexHandle);
-	glBindTexture(GL_TEXTURE_2D, whiteTexHandle);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whiteTex);
-
-
-	
-
 }
 
 void MyGlWindow::render2texture()
@@ -462,6 +467,7 @@ void MyGlWindow::render2texture()
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, renderTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+//	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA, 1, 1);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	//bind texture to the FBO
@@ -478,6 +484,21 @@ void MyGlWindow::render2texture()
 	//set the target for the fragment shader outputs
 	GLenum drawBufs[] = { GL_COLOR_ATTACHMENT0 };
 	glDrawBuffers(1, drawBufs);
+
+	GLenum result = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (result == GL_FRAMEBUFFER_COMPLETE) {
+		cout << "framebuffer complete" << endl;
+	}
+
+	// one pixel with white texture
+	GLuint whiteTexHandle;
+	GLubyte whiteTex[] = { 255, 255, 255, 255 };
+	glActiveTexture(GL_TEXTURE3);
+	glGenTextures(1, &whiteTexHandle);
+	glBindTexture(GL_TEXTURE_2D, whiteTexHandle);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whiteTex);
+
+
 
 	//unbind the framebuffer, and revert to default framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -514,29 +535,21 @@ void MyGlWindow::keyPressEvent(QKeyEvent* e)
 
 void MyGlWindow::paintGL()
 {	
-	//bind to texture's FBO
-//	glBindFramebuffer(GL_FRAMEBUFFER, fboHandle);
-//	glViewport(0, 0, 512, 512); //viewport for texture
-//	//use the white texture here
-//	int loc = glGetUniformLocation(programID, "Tex1");
-//	if (loc >= 0)
-//		glUniform1i(loc, 3);
-//	else
-//		fprintf(stderr, "fbo texture not found");
-//
-//	cout<< loc;
-	
-
-	//but clearing buffer is expensive, so need to be cleared once
+	glBindFramebuffer(GL_FRAMEBUFFER, fboHandle);
+//but clearing buffer is expensive, so need to be cleared once
+	glClearColor(0.94f, 0.56f, 0.43f, 0.80f); // the color of viewport
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
 	glViewport(0, 0, width(), height());
-	
+	glUseProgram(programID);
+
 	int loc = glGetUniformLocation(programID, "Tex1");
 	if (loc >= 0)
 		glUniform1i(loc, 0);
 	else
 		fprintf(stderr, "tex1 not found");
 
+	
 
 	mat4 modelToProjectionMatrix;
 	mat4 viewToProjectionMatrix =
@@ -563,7 +576,7 @@ void MyGlWindow::paintGL()
 	// model transform matrix 
 	GLint modelToWorldTransformMatrixUniformLocation =
 		glGetUniformLocation(programID, "modelToWorldMatrix");
-
+	fullTransformationUniformLocation = glGetUniformLocation(programID, "modelToProjectionMatrix");
 
 
 	// teapots
@@ -576,40 +589,25 @@ void MyGlWindow::paintGL()
 		&teapot1modelToWorldMatrix[0][0]);
 	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
 
-	mat4 teapot2ModelToWorldMatrix =
-		glm::translate(vec3(3.0f, 0.0f, -6.75f)) * glm::rotate(0.0f, vec3(1.0f, 0.0f, 0.0f));
-	modelToProjectionMatrix = worldToProjectionMatrix * teapot2ModelToWorldMatrix;
-	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
-//	glDrawElements(GL_TRIANGLES, teapotNumIndices, GL_UNSIGNED_SHORT, (void*)teapotIndexDataByteOffset);
 
-
-	render2texture();
-	//	glBindFramebuffer(GL_FRAMEBUFFER, fboHandle);
-	//glViewport(0, 0, 512, 512); //viewport for texture
-	//use the white texture here
-	loc = glGetUniformLocation(programID, "Tex1");
-	if (loc >= 0)
-		glUniform1i(loc, 3);
-	else
-		fprintf(stderr, "fbo texture not found");
-	//unbind texture's fbo (back to default FB)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, width(), height());
+	glViewport(0, 0, width(), height()); // Viewport for main window
+	glDisable(GL_DEPTH_TEST);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // the color of viewport
+	glClear(GL_COLOR_BUFFER_BIT);
+	//unbind texture's fbo (back to default FB)
 	//use the texture that is associate with the FBO
-	loc = glGetUniformLocation(programID, "Tex1");
+	glUseProgram(frameProgramID);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, renderTex);
+	loc = glGetUniformLocation(frameProgramID, "screenTexture");
+	
 	glUniform1i(loc, 2);
-
-
-
-	// arrow 
-	glBindVertexArray(arrowVertexArrayObjectID);
-	mat4 arrowModelToWorldMatrix =
-		glm::translate(0.0f, 3.0f, -3.0f) * glm::scale(2.0f, 2.0f, 2.0f);
-	modelToProjectionMatrix = worldToProjectionMatrix * arrowModelToWorldMatrix;
-	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
-	glUniformMatrix4fv(modelToWorldTransformMatrixUniformLocation, 1, GL_FALSE,
-		&arrowModelToWorldMatrix[0][0]);
-	//	glDrawElements(GL_TRIANGLES, arrowNumIndices, GL_UNSIGNED_SHORT, (void*)arrowIndexDataByteOffset);
+	modelToWorldTransformMatrixUniformLocation =
+		glGetUniformLocation(frameProgramID, "modelToWorldMatrix");
+	fullTransformationUniformLocation = 
+		glGetUniformLocation(frameProgramID, "modelToProjectionMatrix");
 
 	//plane
 	glBindVertexArray(planeVertexArrayObjectID);
@@ -620,17 +618,6 @@ void MyGlWindow::paintGL()
 		&planeModelToWorldMatrix[0][0]);
 	glDrawElements(GL_TRIANGLES, planeNumIndices, GL_UNSIGNED_SHORT, (void*)planeIndexDataByteOffset);
 
-	// teapot normals
-	glBindVertexArray(teapotNormalVertexArrayObjectID);
-	//glDrawElements(GL_LINE, teapotNormalIndices, GL_UNSIGNED_SHORT, (void*)teapotNormalIndexDataByteOffset);
-	
-//	printf(" %f/n", teapotNormalIndices);
-	 
-	// arrow normals
-//	glDrawElements(GL_LINE, arrowNormalIndices, GL_UNSIGNED_SHORT, (void*)arrowNormalVertexArrayByteOffset);
-
-	// plane normals
-//	glDrawElements(GL_LINE, planeNormalIndices, GL_UNSIGNED_SHORT, (void*)planeNormalVertexArrayByteOffset);
 }
 
 

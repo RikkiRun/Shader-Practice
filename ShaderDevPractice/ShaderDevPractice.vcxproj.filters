@@ -26,6 +26,8 @@
     <None Include="FragmentShaderCode.glsl" />
     <None Include="UniformShaderCode.glsl" />
     <None Include="ClassDiagram.cd" />
+    <None Include="frameVertexShaderCode.glsl" />
+    <None Include="frameFragmentShaderCode.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Primitives">
@@ -37,5 +39,6 @@
     <Image Include="texture\flower.png" />
     <Image Include="brick.png" />
     <Image Include="texture\brick-specular.png" />
+    <Image Include="texture\pink.png" />
   </ItemGroup>
 </Project>
